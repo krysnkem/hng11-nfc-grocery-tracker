@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 
@@ -126,6 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (bytes.length > 255) {
       throw Exception('Data too large to write to NFC tag');
     }
+    log('$data');
 
     NdefRecord record = NdefRecord.createText(jsonString);
     NdefMessage message = NdefMessage([record]);
