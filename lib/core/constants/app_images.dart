@@ -8,5 +8,7 @@ class AppImages {
   static const String noContent = "assets/svg/no_content.svg";
   static const String inventory = "assets/svg/box.svg";
   static const String settings = "assets/svg/settings.svg";
+  static const String warning = "assets/svg/warning.svg";
+  static const String trend = "assets/svg/trend.svg";
 
 }

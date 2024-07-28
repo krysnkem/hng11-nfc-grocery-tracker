@@ -20,13 +20,13 @@ class _BottomNavigationState extends State<BottomNavigation> {
     setState(() {});
   }
 
-  void onNavigationItem(index) {
+  void onNavigationItem(int index) {
     selectedPage = index;
     notifyListeners();
   }
 
   List<Widget> pages = [
-    const HomeScreen(),
+    Scaffold(backgroundColor: Colors.green,),
     Scaffold(backgroundColor: Colors.green,),
     Scaffold(backgroundColor: Colors.brown,),
     Scaffold(backgroundColor: Colors.yellow,),
@@ -43,7 +43,9 @@ class _BottomNavigationState extends State<BottomNavigation> {
         popUp("Close GroceryTag", pop);
       },
       child: Scaffold(
-        body: pages[selectedPage],
+        body: selectedPage ==0?
+        HomeScreen(onNavigationItem: onNavigationItem):
+        pages[selectedPage],
         bottomNavigationBar: AppBottomNavigationBar(
         onItemSelected: onNavigationItem,
         selectedIndex: selectedPage,
