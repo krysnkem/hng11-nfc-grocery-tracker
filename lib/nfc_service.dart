@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
+
 import 'package:nfc_manager/nfc_manager.dart';
 
 class NFCService {
@@ -7,13 +7,15 @@ class NFCService {
     return NfcManager.instance.isAvailable();
   }
 
-  Future<void> readNfcTag(Function(String) onReadSuccess, Function(String) onError) async {
+  Future<void> readNfcTag(
+      Function(String) onReadSuccess, Function(String) onError) async {
     NfcManager.instance.startSession(onDiscovered: (NfcTag tag) async {
       var ndef = Ndef.from(tag);
       if (ndef != null && ndef.cachedMessage != null) {
         String tempRecord = "";
         for (var record in ndef.cachedMessage!.records) {
-          tempRecord += String.fromCharCodes(record.payload.sublist(record.payload[0] + 1));
+          tempRecord += String.fromCharCodes(
+              record.payload.sublist(record.payload[0] + 1));
         }
 
         try {
@@ -29,7 +31,8 @@ class NFCService {
     });
   }
 
-  Future<void> writeNfcTag(Map<String, dynamic> data, Function(String) onWriteSuccess, Function(String) onError) async {
+  Future<void> writeNfcTag(Map<String, dynamic> data,
+      Function(String) onWriteSuccess, Function(String) onError) async {
     String jsonString = jsonEncode(data);
     List<int> bytes = utf8.encode(jsonString);
 
