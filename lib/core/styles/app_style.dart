@@ -57,6 +57,7 @@ class Styles {
       brightness: Brightness.light,
       appBarTheme:  AppBarTheme(
         elevation: 0.0,
+        scrolledUnderElevation: 0.0,
         centerTitle: false,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         color: Colors.transparent,

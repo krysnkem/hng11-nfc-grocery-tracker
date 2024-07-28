@@ -2,16 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grocey_tag/core/constants/app_images.dart';
+import 'package:grocey_tag/screens/main/home/widgets/activity-list-item.dart';
+
 import 'package:grocey_tag/utils/widget_extensions.dart';
 import 'package:grocey_tag/widgets/app-card.dart';
 import 'package:grocey_tag/widgets/app_button.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
 
+import 'widgets/dashboard_card.dart';
+
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final Function(int) onNavigationItem;
+  const HomeScreen({super.key, required this.onNavigationItem});
 
   @override
   Widget build(BuildContext context) {
+
+    List<Map<String, dynamic>> historyItem = [
+      {
+        "title": "Mr Beast Choco",
+        "date": "16 July at 09:32",
+        "measureUnit": "KG",
+        "quantity": 5,
+      },
+      {
+        "title": "Melon Pods",
+        "date": "16 July at 09:32",
+        "measureUnit": "Cups",
+        "quantity": 10,
+      },
+      {
+        "title": "Green Peas",
+        "date": "16 July at 09:32",
+        "measureUnit": "KG",
+        "quantity": 2,
+      },
+      {
+        "title": "Pasta",
+        "date": "16 July at 09:32",
+        "measureUnit": "Packs",
+        "quantity": 2,
+      },
+      {
+        "title": "Indomie",
+        "date": "16 July at 09:32",
+        "measureUnit": "Carton",
+        "quantity": 1,
+      },
+
+    ];
 
     bool show = true;
 
@@ -21,7 +60,7 @@ class HomeScreen extends StatelessWidget {
       ): null,
       body: show?
       ListView(
-        padding: EdgeInsets.only(top: 10.sp, left: 16.sp, right: 16.sp),
+        padding: EdgeInsets.only(top: 0.sp, left: 16.sp, right: 16.sp),
         children: [
           AppText(
             "Inventory Summary:",
@@ -29,7 +68,96 @@ class HomeScreen extends StatelessWidget {
             weight: FontWeight.w500,
           ),
           16.sp.sbH,
-          AppCard()
+          Row(
+            children: [
+              DashBoardCard(
+                count: 15,
+                svgImage: AppImages.inventory,
+                title: "Total items",
+              ),
+              16.sp.sbW,
+              DashBoardCard(
+                count: 3,
+                svgImage: AppImages.trend,
+                title: "Running low",
+              ),
+            ],
+          ),
+          16.sp.sbH,
+          Row(
+            children: [
+              DashBoardCard(
+                count: 6,
+                svgImage: AppImages.warning,
+                title: "Expiring soon",
+              ),
+              16.sp.sbW,
+              DashNavigateCard(
+                onTap: ()=> onNavigationItem(1),
+              ),
+            ],
+          ),
+          30.sp.sbH,
+          AppText(
+            "Quick Actions:",
+            size: 16.sp,
+            weight: FontWeight.w500,
+          ),
+          16.sp.sbH,
+          Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  onTap: (){},
+                  text: "Update Item",
+                ),
+              ),
+              16.sp.sbW,
+              Expanded(
+                child: AppButton(
+                  onTap: (){},
+                  isOutline: true,
+                  text: "View Shop List",
+                ),
+              ),
+
+            ],
+          ),
+          30.sp.sbH,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              AppText(
+                "Recent Activity:",
+                size: 16.sp,
+                weight: FontWeight.w500,
+              ),
+              AppCard(
+                heights: 28.sp,
+                onTap: ()=> onNavigationItem(2),
+                widths: 85.sp,
+                padding: 0.0.padA,
+                radius: 24.sp,
+                backgroundColor: const Color(0xFFDEDEDE),
+                child: const Center(child: AppText("View all", weight: FontWeight.w600,)),
+              )
+            ],
+          ),
+          16.sp.sbH,
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: historyItem.length,
+            itemBuilder: (context, index){
+              return ActivityHistoryItem(
+                title: historyItem[index]["title"],
+                date: historyItem[index]["date"],
+                quantity: historyItem[index]["quantity"],
+                measureUnit: historyItem[index]["measureUnit"]
+              );
+            }
+          ),
+          30.sp.sbH
         ],
       ):
       Padding(

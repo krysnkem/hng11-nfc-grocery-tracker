@@ -62,11 +62,10 @@ class AppButton extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(borderRadius??5),
-              border: isTransparent? null: isOutline? Border.all(
+              border: isTransparent? null:  Border.all(
                   width: borderWidth ?? 1.sp,
-                  color: borderColor != null? (onTap == null || isLoading==true? borderColor!.withOpacity(0.5) : borderColor!) : (onTap == null || isLoading==true? blackColor.withOpacity(0.5): blackColor))
-                  : null,
-              color: isOutline && isTransparent? null
+                  color: borderColor != null? (onTap == null || isLoading==true? borderColor!.withOpacity(0.5) : borderColor!) : (onTap == null || isLoading==true? (!isOutline? primaryColor.withOpacity(0.5) :blackColor.withOpacity(0.5)): (!isOutline? primaryColor: blackColor))),
+              color: isOutline || isTransparent? Colors.transparent
                   : backGroundColor!=null? (onTap == null || isLoading==true? backGroundColor!.withOpacity(0.5): backGroundColor) : (onTap == null || isLoading==true? primaryColor.withOpacity(0.5): primaryColor),
             ),
             child: Material(
