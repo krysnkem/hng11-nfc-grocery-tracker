@@ -1,8 +1,6 @@
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:nfc_manager/nfc_manager.dart';
+
+import 'nfc_service.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -19,10 +17,12 @@ class _MyHomePageState extends State<MyHomePage> {
   double _price = 0.0;
   bool _isLoading = false;
 
+  final NFCService _nfcService = NFCService();
+
   @override
   void initState() {
     super.initState();
-    checkNfcAvailable = NfcManager.instance.isAvailable();
+    checkNfcAvailable = _nfcService.isNfcAvailable();
   }
 
   @override
@@ -78,43 +78,24 @@ class _MyHomePageState extends State<MyHomePage> {
       _isLoading = true;
     });
 
-    NfcManager.instance.startSession(onDiscovered: (NfcTag badge) async {
-      var ndef = Ndef.from(badge);
-
-      if (ndef != null && ndef.cachedMessage != null) {
-        String tempRecord = "";
-        for (var record in ndef.cachedMessage!.records) {
-          tempRecord =
-              "$tempRecord${String.fromCharCodes(record.payload.sublist(record.payload[0] + 1))}";
-        }
-
-        try {
-          Map<String, dynamic> jsonData = jsonDecode(tempRecord);
-          setState(() {
-            _readFromNfcTag = jsonData.toString();
-          });
-        } catch (e) {
-          // Handle JSON decoding error
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to decode JSON data'),
-            ),
-          );
-        }
-      } else {
-        // Show a snackbar for example
+    _nfcService.readNfcTag(
+      (data) {
+        setState(() {
+          _readFromNfcTag = data;
+          _isLoading = false;
+        });
+      },
+      (error) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No data'),
+          SnackBar(
+            content: Text(error),
           ),
         );
-      }
-
-      NfcManager.instance.stopSession();
-      setState(() {
-        _isLoading = false;
-      });
-    });
+        setState(() {
+          _isLoading = false;
+        });
+      },
+    );
   }
 
   Future<void> _writeToNfcTag(Map<String, dynamic> data) async {
@@ -122,55 +103,29 @@ class _MyHomePageState extends State<MyHomePage> {
       _isLoading = true;
     });
 
-    String jsonString = jsonEncode(data);
-    List<int> bytes = utf8.encode(jsonString);
-
-    if (bytes.length > 255) {
-      throw Exception('Data too large to write to NFC tag');
-    }
-    log('$data');
-
-    NdefRecord record = NdefRecord.createText(jsonString);
-    NdefMessage message = NdefMessage([record]);
-
-    try {
-      await NfcManager.instance.startSession(onDiscovered: (NfcTag tag) async {
-        var ndef = Ndef.from(tag);
-
-        if (ndef == null) {
-          throw Exception('Tag is not NDEF formatted');
-        }
-
-        ndef.write(message).then(
-          (_) {
-            if (ndef.isWritable) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Data written to NFC tag successfully'),
-                ),
-              );
-            } else {
-              throw Exception('Failed to write to NFC tag');
-            }
-
-            NfcManager.instance.stopSession();
-            setState(() {
-              _isLoading = false;
-            });
-          },
+    _nfcService.writeNfcTag(
+      data,
+      (successMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(successMessage),
+          ),
         );
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-        ),
-      );
-      NfcManager.instance.stopSession();
-      setState(() {
-        _isLoading = false;
-      });
-    }
+        setState(() {
+          _isLoading = false;
+        });
+      },
+      (errorMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+          ),
+        );
+        setState(() {
+          _isLoading = false;
+        });
+      },
+    );
   }
 
   void _showWriteDialog() {
