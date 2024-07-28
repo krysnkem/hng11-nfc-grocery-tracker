@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grocey_tag/core/constants/app_images.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
+import 'package:grocey_tag/widgets/app-card.dart';
 import 'package:grocey_tag/widgets/app_button.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
 
@@ -11,11 +12,27 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    bool show = true;
+
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text("Welcome back!"),
-      // ),
-      body: Padding(
+      appBar:show?  AppBar(
+        title: Text("Welcome back!"),
+      ): null,
+      body: show?
+      ListView(
+        padding: EdgeInsets.only(top: 10.sp, left: 16.sp, right: 16.sp),
+        children: [
+          AppText(
+            "Inventory Summary:",
+            size: 16.sp,
+            weight: FontWeight.w500,
+          ),
+          16.sp.sbH,
+          AppCard()
+        ],
+      ):
+      Padding(
         padding: 16.sp.padA,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -7,6 +7,7 @@ import 'package:grocey_tag/core/routes/routes.dart';
 import 'package:grocey_tag/screens/main/bottom_navigation.dart';
 import 'package:grocey_tag/services/navigation.service.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
+import 'package:grocey_tag/widgets/apptext.dart';
 
 import '../../core/constants/constants.dart';
 
@@ -65,11 +66,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
             ),
             16.sp.sbH,
-            SvgPicture.asset(
-                AppImages.appName,
-                height: 24.98.sp,
-                width: 153.56.sp
-            )
+            AppText("GroceryTag", size: 28.sp, weight: FontWeight.w800,)
           ],
         ),
       ),
