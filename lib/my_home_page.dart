@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'nfc_service.dart';
+import 'services/nfc_service.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
