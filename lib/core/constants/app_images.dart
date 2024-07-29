@@ -1,5 +1,4 @@
 class AppImages {
-
   //SVG
   static const String appSplashLogo = "assets/svg/app_logo.svg";
   static const String appName = "assets/svg/grocery.svg";
@@ -10,6 +9,8 @@ class AppImages {
   static const String settings = "assets/svg/settings.svg";
   static const String warning = "assets/svg/warning.svg";
   static const String trend = "assets/svg/trend.svg";
+  static const String addlist = "assets/svg/add.svg";
+  static const String noResults = "assets/svg/noresults.svg";
+  static const String calendars = "assets/svg/calendar.svg";
   static const String scan = "assets/svg/scan.svg";
-
 }
