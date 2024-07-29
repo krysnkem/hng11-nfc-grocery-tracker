@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:grocey_tag/screens/main/inventory/inventory.dart';
 
 import '../../utils/pop_up.dart';
 import '../../widgets/botton_nav_component.dart';
@@ -13,10 +14,9 @@ class BottomNavigation extends StatefulWidget {
 }
 
 class _BottomNavigationState extends State<BottomNavigation> {
-
   int selectedPage = 0;
 
-  notifyListeners(){
+  notifyListeners() {
     setState(() {});
   }
 
@@ -26,14 +26,23 @@ class _BottomNavigationState extends State<BottomNavigation> {
   }
 
   List<Widget> pages = [
-    Scaffold(backgroundColor: Colors.green,),
-    Scaffold(backgroundColor: Colors.green,),
-    Scaffold(backgroundColor: Colors.brown,),
-    Scaffold(backgroundColor: Colors.yellow,),
+    Scaffold(
+      backgroundColor: Colors.green,
+    ),
+    Inventory(
+      onNavigationItem: (int) {},
+    ),
+    Scaffold(
+      backgroundColor: Colors.brown,
+    ),
+    Scaffold(
+      backgroundColor: Colors.yellow,
+    ),
   ];
 
   Future<void> pop({bool? animated}) async {
-    await SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop', animated);
+    await SystemChannels.platform
+        .invokeMethod<void>('SystemNavigator.pop', animated);
   }
 
   @override
@@ -53,5 +62,6 @@ class _BottomNavigationState extends State<BottomNavigation> {
       ),
       )
     );
+
   }
 }
