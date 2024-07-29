@@ -12,4 +12,5 @@ class AppImages {
   static const String addlist = "assets/svg/add.svg";
   static const String noResults = "assets/svg/noresults.svg";
   static const String calendars = "assets/svg/calendar.svg";
+  static const String scan = "assets/svg/scan.svg";
 }
