@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grocey_tag/core/constants/app_images.dart';
+import 'package:grocey_tag/core/constants/constants.dart';
 import 'package:grocey_tag/screens/main/home/widgets/activity-list-item.dart';
 import 'package:grocey_tag/utils/snack_message.dart';
 
@@ -13,6 +14,8 @@ import 'package:grocey_tag/widgets/apptext.dart';
 import '../../../services/nfc_service.dart';
 import '../../../utils/app-bottom-sheet.dart';
 import '../../../utils/get-device-name.dart';
+import '../../../widgets/scan-tage-widget.dart';
+import '../edit-item/edit-item-screen.dart';
 import 'widgets/dashboard_card.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,20 +30,27 @@ class _HomeScreenState extends State<HomeScreen> {
   bool? checkNfcAvailable;
   final NFCService _nfcService = NFCService();
 
-  // updateTag(){
-  //   appBottomSheet(const Column(), height: 462.sp);
-  // }
+  updateTag(){
+    appBottomSheet(ScanTagWidget(onTap: readTag,), height: 462.sp);
+  }
 
   readTag()async{
-    if(checkNfcAvailable== true){
-      _nfcService.readNfcTag((data) {
 
-      }, (error) {
-          showCustomToast(error);
-      });
-      return;
-    }
-    showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
+    // FOR TESTING
+    navigationService.navigateToWidget(const EditItemScreen());
+
+    // USE THIS LATER UNCOMMENT THE BELOW
+
+
+    // if(checkNfcAvailable== true){
+    //   _nfcService.readNfcTag((data) {
+    //   navigationService.navigateToWidget(const EditItemScreen());
+    //   }, (error) {
+    //       showCustomToast(error);
+    //   });
+    //   return;
+    // }
+    // showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
   }
 
   List<Map<String, dynamic>> historyItem = [
@@ -147,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Expanded(
                 child: AppButton(
-                  onTap: readTag,
+                  onTap: updateTag,
                   text: "Update Item",
                 ),
               ),
