@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grocey_tag/core/constants/app_images.dart';
 import 'package:grocey_tag/core/constants/constants.dart';
+import 'package:grocey_tag/core/constants/pallete.dart';
 import 'package:grocey_tag/screens/main/home/widgets/activity-list-item.dart';
 import 'package:grocey_tag/utils/snack_message.dart';
 
@@ -29,28 +30,98 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool? checkNfcAvailable;
   final NFCService _nfcService = NFCService();
+  bool _isLoading = false;
 
   updateTag(){
     appBottomSheet(ScanTagWidget(onTap: readTag,), height: 462.sp);
   }
 
+  ShowOption(){
+    appBottomSheet(Column(
+      children: [
+        AppButton(
+          text: "Update Item",
+          isOutline: true,
+          borderColor: primaryColor,
+          textColor: primaryColor,
+          onTap: (){
+            navigationService.goBack();
+            updateTag();
+          },
+        ),
+        10.sp.sbH,
+        AppButton(
+          text: "Add Item",
+          isOutline: true,
+          borderColor: primaryColor,
+          textColor: primaryColor,
+          onTap: (){
+            navigationService.goBack();
+            _writeToNfcTag({
+              'itemName': "Start",
+              'itemQuantity': 9,
+              'price': 300,
+            });
+          },
+        ),
+        10.sp.sbH,
+        AppButton(
+          text: "Update Item",
+          isTransparent: true,
+          onTap: navigationService.goBack,
+          textColor: Colors.red,
+        ),
+      ],
+    ));
+  }
+
+  Future<void> _writeToNfcTag(Map<String, dynamic> data) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    _nfcService.writeNfcTag(
+      data,
+          (successMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(successMessage),
+          ),
+        );
+        setState(() {
+          _isLoading = false;
+        });
+      },
+          (errorMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+          ),
+        );
+        setState(() {
+          _isLoading = false;
+        });
+      },
+    );
+  }
+
   readTag()async{
 
     // FOR TESTING
-    navigationService.navigateToWidget(const EditItemScreen());
+    // navigationService.navigateToWidget(const EditItemScreen());
 
     // USE THIS LATER UNCOMMENT THE BELOW
 
 
-    // if(checkNfcAvailable== true){
-    //   _nfcService.readNfcTag((data) {
-    //   navigationService.navigateToWidget(const EditItemScreen());
-    //   }, (error) {
-    //       showCustomToast(error);
-    //   });
-    //   return;
-    // }
-    // showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
+    if(checkNfcAvailable== true){
+      _nfcService.readNfcTag((data) {
+      navigationService.navigateToWidget(const EditItemScreen());
+      }, (error) {
+          showCustomToast(error);
+      });
+      return;
+    }
+    showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
   }
 
   List<Map<String, dynamic>> historyItem = [

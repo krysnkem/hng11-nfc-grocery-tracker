@@ -16,6 +16,7 @@ import 'package:grocey_tag/utils/widget_extensions.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
 import 'package:grocey_tag/widgets/text-field-widget.dart';
 
+import '../../../services/nfc_service.dart';
 import '../../../utils/app-bottom-sheet.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/scan-tage-widget.dart';
@@ -65,28 +66,33 @@ class _EditItemScreenState extends State<EditItemScreen> {
   }
 
   submit(){
-    appBottomSheet(ScanTagWidget(onTap: readTag,), height: 462.sp);
+    appBottomSheet(ScanTagWidget(onTap:()=> _writeToNfcTag(
+        {
+          'itemName': nameController.text.trim(),
+          'itemQuantity': quantityController.text.trim(),
+          'price': warningQuantityController.text.trim(),
+        }
+    ),), height: 462.sp);
   }
 
-  readTag()async{
+  Future<void> _writeToNfcTag(Map<String, dynamic> data) async {
+    final NFCService _nfcService = NFCService();
 
-    // FOR TESTING
-    showCustomToast("Item Updated Successfully", success: true);
-    navigationService.goBack();
-
-    // USE THIS LATER UNCOMMENT THE BELOW
-
-
-    // if(checkNfcAvailable== true){
-    //   _nfcService.readNfcTag((data) {
-    //   showCustomToast("Item Updated Successfully", success: true);
-    //   navigationService.goBack();
-    //   }, (error) {
-    //       showCustomToast(error);
-    //   });
-    //   return;
-    // }
-    // showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
+    _nfcService.writeNfcTag(
+      data,
+          (successMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(successMessage),
+          ),
+        );
+        showCustomToast("Item Updated Successfully", success: true);
+        navigationService.goBack();
+      },
+          (errorMessage) {
+            showCustomToast(errorMessage);
+      },
+    );
   }
 
 
