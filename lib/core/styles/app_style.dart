@@ -42,11 +42,6 @@ class Styles {
           fontSize: 14.sp,
           fontWeight: FontWeight.normal,
         ),
-        bodyLarge: TextStyle(
-          color: blackColor,
-          fontSize: 24.sp,
-          fontWeight: FontWeight.w500,
-        ),
         titleLarge: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
