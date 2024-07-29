@@ -38,59 +38,91 @@ class AppButton extends StatelessWidget {
       this.borderColor,
       this.textColor,
       this.backGroundColor,
-      this.text, this.borderRadius, this.padding, this.height, this.textSize, this.isExpanded = true, this.noHeight})
+      this.text,
+      this.borderRadius,
+      this.padding,
+      this.height,
+      this.textSize,
+      this.isExpanded = true,
+      this.noHeight})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        isExpanded? Expanded(child: buttonBuild()): buttonBuild(),
+        isExpanded ? Expanded(child: buttonBuild()) : buttonBuild(),
       ],
     );
   }
 
   Material buttonBuild() {
     return Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: isLoading == true ? null : onTap,
-          borderRadius: BorderRadius.circular(borderRadius?? 8.sp),
-          child: Container(
-            height: noHeight==true? null: height ?? 46.sp,
-            width: width,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(borderRadius??5),
-              border: isTransparent? null:  Border.all(
-                  width: borderWidth ?? 1.sp,
-                  color: borderColor != null? (onTap == null || isLoading==true? borderColor!.withOpacity(0.5) : borderColor!) : (onTap == null || isLoading==true? (!isOutline? primaryColor.withOpacity(0.5) :blackColor.withOpacity(0.5)): (!isOutline? primaryColor: blackColor))),
-              color: isOutline || isTransparent? Colors.transparent
-                  : backGroundColor!=null? (onTap == null || isLoading==true? backGroundColor!.withOpacity(0.5): backGroundColor) : (onTap == null || isLoading==true? primaryColor.withOpacity(0.5): primaryColor),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                child: Padding(
-                    padding:
-                        padding?? EdgeInsets.symmetric(horizontal: 5.sp, vertical: 5.sp),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        child ??
-                                AppText(
-                                  text ?? "",
-                                  isBold: true,
-                                  color: textColor?? (isTransparent == true ? (onTap == null || isLoading==true? primaryColor.withOpacity(0.5): primaryColor): isOutline == true ? (onTap == null || isLoading==true? blackColor.withOpacity(0.5): blackColor): whiteColor),
-                                  align: TextAlign.center,
-                                  size: textSize,
-                                ),
-                      ],
-                    )),
-              ),
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: isLoading == true ? null : onTap,
+        borderRadius: BorderRadius.circular(borderRadius ?? 8.sp),
+        child: Container(
+          height: noHeight == true ? null : height ?? 46.sp,
+          width: width,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(borderRadius ?? 5),
+            border: isTransparent
+                ? null
+                : Border.all(
+                    width: borderWidth ?? 1.sp,
+                    color: borderColor != null
+                        ? (onTap == null || isLoading == true
+                            ? borderColor!.withOpacity(0.5)
+                            : borderColor!)
+                        : (onTap == null || isLoading == true
+                            ? (!isOutline
+                                ? primaryColor.withOpacity(0.5)
+                                : blackColor.withOpacity(0.5))
+                            : (!isOutline ? primaryColor : blackColor))),
+            color: isOutline || isTransparent
+                ? Colors.transparent
+                : backGroundColor != null
+                    ? (onTap == null || isLoading == true
+                        ? backGroundColor!.withOpacity(0.5)
+                        : backGroundColor)
+                    : (onTap == null || isLoading == true
+                        ? primaryColor.withOpacity(0.5)
+                        : primaryColor),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              child: Padding(
+                  padding: padding ??
+                      EdgeInsets.symmetric(horizontal: 5.sp, vertical: 5.sp),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      child ??
+                          AppText(
+                            text ?? "",
+                            isBold: true,
+                            color: textColor ??
+                                (isTransparent == true
+                                    ? (onTap == null || isLoading == true
+                                        ? primaryColor.withOpacity(0.5)
+                                        : primaryColor)
+                                    : isOutline == true
+                                        ? (onTap == null || isLoading == true
+                                            ? blackColor.withOpacity(0.5)
+                                            : blackColor)
+                                        : whiteColor),
+                            align: TextAlign.center,
+                            size: textSize,
+                          ),
+                    ],
+                  )),
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 }
