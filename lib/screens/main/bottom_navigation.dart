@@ -48,17 +48,20 @@ class _BottomNavigationState extends State<BottomNavigation> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-        onPopInvoked: (val) {
-          popUp("Close GroceryTag", pop);
-        },
-        child: Scaffold(
-          body: selectedPage == 0
-              ? HomeScreen(onNavigationItem: onNavigationItem)
-              : pages[selectedPage],
-          bottomNavigationBar: AppBottomNavigationBar(
-            onItemSelected: onNavigationItem,
-            selectedIndex: selectedPage,
-          ),
-        ));
+      onPopInvoked: (val) {
+        popUp("Close GroceryTag", pop);
+      },
+      canPop: false,
+      child: Scaffold(
+        body: selectedPage ==0?
+        HomeScreen(onNavigationItem: onNavigationItem):
+        pages[selectedPage],
+        bottomNavigationBar: AppBottomNavigationBar(
+        onItemSelected: onNavigationItem,
+        selectedIndex: selectedPage,
+      ),
+      )
+    );
+
   }
 }
