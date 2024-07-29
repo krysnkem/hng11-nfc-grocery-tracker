@@ -3,57 +3,96 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grocey_tag/core/constants/app_images.dart';
 import 'package:grocey_tag/screens/main/home/widgets/activity-list-item.dart';
+import 'package:grocey_tag/utils/snack_message.dart';
 
 import 'package:grocey_tag/utils/widget_extensions.dart';
 import 'package:grocey_tag/widgets/app-card.dart';
 import 'package:grocey_tag/widgets/app_button.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
 
+import '../../../services/nfc_service.dart';
+import '../../../utils/app-bottom-sheet.dart';
+import '../../../utils/get-device-name.dart';
 import 'widgets/dashboard_card.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   final Function(int) onNavigationItem;
   const HomeScreen({super.key, required this.onNavigationItem});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool? checkNfcAvailable;
+  final NFCService _nfcService = NFCService();
+
+  // updateTag(){
+  //   appBottomSheet(const Column(), height: 462.sp);
+  // }
+
+  readTag()async{
+    if(checkNfcAvailable== true){
+      _nfcService.readNfcTag((data) {
+
+      }, (error) {
+          showCustomToast(error);
+      });
+      return;
+    }
+    showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
+  }
+
+  List<Map<String, dynamic>> historyItem = [
+    {
+      "title": "Mr Beast Choco",
+      "date": "16 July at 09:32",
+      "measureUnit": "KG",
+      "quantity": 5,
+    },
+    {
+      "title": "Melon Pods",
+      "date": "16 July at 09:32",
+      "measureUnit": "Cups",
+      "quantity": 10,
+    },
+    {
+      "title": "Green Peas",
+      "date": "16 July at 09:32",
+      "measureUnit": "KG",
+      "quantity": 2,
+    },
+    {
+      "title": "Pasta",
+      "date": "16 July at 09:32",
+      "measureUnit": "Packs",
+      "quantity": 2,
+    },
+    {
+      "title": "Indomie",
+      "date": "16 July at 09:32",
+      "measureUnit": "Carton",
+      "quantity": 1,
+    },
+
+  ];
+
+  bool show = true;
+
+  init()async{
+    checkNfcAvailable = await _nfcService.isNfcAvailable();
+    print(checkNfcAvailable);
+  }
+
+  @override
+  void initState() {
+    init();
+    super.initState();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
-
-    List<Map<String, dynamic>> historyItem = [
-      {
-        "title": "Mr Beast Choco",
-        "date": "16 July at 09:32",
-        "measureUnit": "KG",
-        "quantity": 5,
-      },
-      {
-        "title": "Melon Pods",
-        "date": "16 July at 09:32",
-        "measureUnit": "Cups",
-        "quantity": 10,
-      },
-      {
-        "title": "Green Peas",
-        "date": "16 July at 09:32",
-        "measureUnit": "KG",
-        "quantity": 2,
-      },
-      {
-        "title": "Pasta",
-        "date": "16 July at 09:32",
-        "measureUnit": "Packs",
-        "quantity": 2,
-      },
-      {
-        "title": "Indomie",
-        "date": "16 July at 09:32",
-        "measureUnit": "Carton",
-        "quantity": 1,
-      },
-
-    ];
-
-    bool show = true;
-
     return Scaffold(
       appBar:show?  AppBar(
         title: Text("Welcome back!"),
@@ -93,7 +132,7 @@ class HomeScreen extends StatelessWidget {
               ),
               16.sp.sbW,
               DashNavigateCard(
-                onTap: ()=> onNavigationItem(1),
+                onTap: ()=> widget.onNavigationItem(1),
               ),
             ],
           ),
@@ -108,7 +147,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: AppButton(
-                  onTap: (){},
+                  onTap: readTag,
                   text: "Update Item",
                 ),
               ),
@@ -134,7 +173,7 @@ class HomeScreen extends StatelessWidget {
               ),
               AppCard(
                 heights: 28.sp,
-                onTap: ()=> onNavigationItem(2),
+                onTap: ()=> widget.onNavigationItem(2),
                 widths: 85.sp,
                 padding: 0.0.padA,
                 radius: 24.sp,

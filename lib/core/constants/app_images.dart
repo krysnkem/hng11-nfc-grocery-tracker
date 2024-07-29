@@ -10,5 +10,6 @@ class AppImages {
   static const String settings = "assets/svg/settings.svg";
   static const String warning = "assets/svg/warning.svg";
   static const String trend = "assets/svg/trend.svg";
+  static const String scan = "assets/svg/scan.svg";
 
 }
