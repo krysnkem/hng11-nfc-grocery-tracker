@@ -32,11 +32,15 @@ class _HomeScreenState extends State<HomeScreen> {
   final NFCService _nfcService = NFCService();
   bool _isLoading = false;
 
-  updateTag(){
-    appBottomSheet(ScanTagWidget(onTap: readTag,), height: 462.sp);
+  updateTag(bool update){
+    appBottomSheet(ScanTagWidget(onTap: !update? readTag: ()=> _writeToNfcTag({
+      'itemName': "Start",
+      'itemQuantity': 9,
+      'price': 300,
+    }),), height: 462.sp);
   }
 
-  ShowOption(){
+  showOption(){
     appBottomSheet(Column(
       children: [
         AppButton(
@@ -46,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
           textColor: primaryColor,
           onTap: (){
             navigationService.goBack();
-            updateTag();
+            updateTag(false);
           },
         ),
         10.sp.sbH,
@@ -57,11 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
           textColor: primaryColor,
           onTap: (){
             navigationService.goBack();
-            _writeToNfcTag({
-              'itemName': "Start",
-              'itemQuantity': 9,
-              'price': 300,
-            });
+            updateTag(true);
           },
         ),
         10.sp.sbH,
@@ -76,33 +76,29 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _writeToNfcTag(Map<String, dynamic> data) async {
-    setState(() {
-      _isLoading = true;
-    });
+    if(checkNfcAvailable==true){
+      setState(() {
+        _isLoading = true;
+      });
 
-    _nfcService.writeNfcTag(
-      data,
-          (successMessage) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(successMessage),
-          ),
-        );
-        setState(() {
-          _isLoading = false;
-        });
-      },
-          (errorMessage) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-          ),
-        );
-        setState(() {
-          _isLoading = false;
-        });
-      },
-    );
+      _nfcService.writeNfcTag(
+        data,
+            (successMessage) {
+              showCustomToast(successMessage);
+          setState(() {
+            _isLoading = false;
+          });
+        },
+            (errorMessage) {
+              showCustomToast(errorMessage);
+          setState(() {
+            _isLoading = false;
+          });
+        },
+      );
+    }else{
+      showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
+    }
   }
 
   readTag()async{
@@ -228,8 +224,8 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Expanded(
                 child: AppButton(
-                  onTap: updateTag,
-                  text: "Update Item",
+                  onTap: showOption,
+                  text: "Scan Item Tag",
                 ),
               ),
               16.sp.sbW,
