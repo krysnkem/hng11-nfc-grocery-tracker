@@ -42,6 +42,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
       onPopInvoked: (val) {
         popUp("Close GroceryTag", pop);
       },
+      canPop: false,
       child: Scaffold(
         body: selectedPage ==0?
         HomeScreen(onNavigationItem: onNavigationItem):
