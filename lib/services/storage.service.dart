@@ -1,3 +1,35 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:grocey_tag/core/enums/enum.dart';
+import 'package:grocey_tag/core/models/activity.dart';
+import 'package:grocey_tag/core/models/item.dart';
+
+
+class FlutterSecureStorageService {
+  FlutterSecureStorage storage = const FlutterSecureStorage();
+
+  storeItem({String? key, String? value}) async {
+    await storage.write(key: key!, value: value);
+  }
+
+  Future<dynamic> readItem({String? key}) async {
+    final value = await storage.read(key: key!);
+    return value;
+  }
+
+  deleteItem({String? key}) async {
+    await storage.delete(key: key!);
+  }
+
+  deleteAllItems() async {
+    await storage.deleteAll();
+  }
+
+  Future<dynamic> hasKey({String? key}) async {
+    return await storage.containsKey(key: key!);
+  }
+}
+
+
 // so our storage would be for items and activity
 // for items, we
 // should be able to read all items
@@ -8,10 +40,6 @@
 // for recent activity, we just want to
 // read all activities
 // write an activity
-
-import 'package:grocey_tag/core/enums/enum.dart';
-import 'package:grocey_tag/core/models/activity.dart';
-import 'package:grocey_tag/core/models/item.dart';
 
 class StorageService {
   static const _operationDuration = Duration(milliseconds: 500);
