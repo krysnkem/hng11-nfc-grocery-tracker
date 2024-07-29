@@ -21,14 +21,14 @@ import '../../../utils/app-bottom-sheet.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/scan-tage-widget.dart';
 
-class EditItemScreen extends StatefulWidget {
-  const EditItemScreen({super.key});
+class AddItemScreen extends StatefulWidget {
+  const AddItemScreen({super.key});
 
   @override
-  State<EditItemScreen> createState() => _EditItemScreenState();
+  State<AddItemScreen> createState() => _AddItemScreenState();
 }
 
-class _EditItemScreenState extends State<EditItemScreen> {
+class _AddItemScreenState extends State<AddItemScreen> {
   TextEditingController nameController = TextEditingController();
   TextEditingController quantityController = TextEditingController();
   TextEditingController warningQuantityController = TextEditingController();
@@ -81,11 +81,6 @@ class _EditItemScreenState extends State<EditItemScreen> {
     _nfcService.writeNfcTag(
       data,
           (successMessage) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(successMessage),
-          ),
-        );
         showCustomToast("Item Updated Successfully", success: true);
         navigationService.goBack();
       },
@@ -100,13 +95,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppText("Item Details", size: 22.sp, weight: FontWeight.w600,),
-            AppText("Details of items in inventory", size: 12.sp)
-          ],
-        ),
+        title: AppText("Add new item", size: 22.sp, weight: FontWeight.w600,),
       ),
       body: GestureDetector(
         onTap: ()=> FocusManager.instance.primaryFocus?.unfocus(),
@@ -154,6 +143,12 @@ class _EditItemScreenState extends State<EditItemScreen> {
                         onChanged: onChange,
                       ),
                       10.sp.sbH,
+                      AppText(
+                        "What amount should this item be automatically added to the Shop List",
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 12.sp),
+                        align: TextAlign.start,
+                      ),
+                      16.sp.sbH,
                       AppTextField(
                         hintText:  "Purchase Date",
                         controller: purchaseDateController,
@@ -184,23 +179,9 @@ class _EditItemScreenState extends State<EditItemScreen> {
                   )
                 ),
                 16.sp.sbH,
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppButton(
-                        isOutline: true,
-                        text: "Cancel",
-                        onTap: navigationService.goBack,
-                      ),
-                    ),
-                    16.sp.sbW,
-                    Expanded(
-                      child: AppButton(
-                        text: "Save",
-                        onTap: submit,
-                      ),
-                    ),
-                  ],
+                AppButton(
+                  text: "Save",
+                  onTap: submit,
                 )
               ],
             ),

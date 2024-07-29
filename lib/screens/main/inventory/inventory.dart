@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -8,9 +9,10 @@ import 'package:grocey_tag/utils/widget_extensions.dart';
 import 'package:grocey_tag/widgets/app_button.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
 import 'package:grocey_tag/widgets/searchbar.dart';
+import 'package:grocey_tag/widgets/text-field-widget.dart';
 
 import '../../../widgets/filter.dart';
-import 'items-details.dart';
+import '../edit-item/edit-item-screen.dart';
 
 class Inventory extends StatelessWidget {
   final Function(int) onNavigationItem;
@@ -18,6 +20,14 @@ class Inventory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<String> filterItems = ["Date Bought", "Quantity", "Expiry Date"];
+
+    String? selectedFilter;
+
+    onSelect(String val){
+      selectedFilter = val;
+    }
+
     List<Map<String, dynamic>> item = [
       {
         "title": "Bell Carrot",
@@ -73,14 +83,14 @@ class Inventory extends StatelessWidget {
     bool isempty = false;
     return Scaffold(
         appBar: AppBar(
-          title: Text("Inventory"),
+          title: const Text("Inventory"),
           actions: [
             SvgPicture.asset(
               AppImages.addlist,
               height: 24.sp,
               width: 24.sp,
             ),
-            10.w.sbW
+            16.w.sbW
           ],
         ),
         body: isempty
@@ -118,80 +128,104 @@ class Inventory extends StatelessWidget {
                   ]))
                 ],
               )
-            : Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      AppSearchbar(
-                        width: 273.sp,
-                        height: 32.sp,
-                        backgroundColor: Colors.white,
-                        borderWidth: 0.5,
+            :
+        GestureDetector(
+          onTap: ()=> FocusManager.instance.primaryFocus?.unfocus(),
+          child: Column(
+            children: [
+              Padding(
+                padding: 16.sp.padH,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: AppTextField(
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16.sp, vertical: 7.sp),
+                        prefix: Icon(
+                          CupertinoIcons.search,
+                          size: 26.sp,
+                        ),
+                        hint: "Search",
                       ),
-                      20.w.sbW,
-                      filterbutton(
-                        onTap: () {},
+                    ),
+                    20.w.sbW,
+                    Container(
+                      height: 48.sp,
+                      width: 88.sp,
+                      alignment: Alignment.center,
+                      child: PopupMenuButton<String>(
+                        onSelected: onSelect,
+                        itemBuilder: (BuildContext context) {
+                          return filterItems.map((String choice) {
+                            return PopupMenuItem<String>(
+                              value: choice,
+                              child: AppText(choice, weight: FontWeight.w400, size: 12.sp,),
+                            );
+                          }).toList();
+                        },
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Filterbutton(),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                  15.h.sbH,
-                  Expanded(
-                    child: ListView.builder(
-                      physics: BouncingScrollPhysics(),
-                      itemCount: item.length,
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Itemsdetails()));
-                          },
-                          child: Column(
-                            children: [
-                              ListTile(
-                                title: Row(
-                                  children: [
-                                    AppText(
-                                      item[index]['title'],
-                                      size: 16.sp,
-                                      weight: FontWeight.w500,
-                                    ),
-                                    Spacer(),
-                                    trailer(
-                                        date: item[index]["purchase date"],
-                                        text: 'Purchase:')
-                                  ],
+                    )
+                  ],
+                ),
+              ),
+              15.h.sbH,
+              Expanded(
+                child: ListView.builder(
+                  itemCount: item.length,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => EditItemScreen()));
+                      },
+                      child: Column(
+                        children: [
+                          ListTile(
+                            title: Row(
+                              children: [
+                                AppText(
+                                  item[index]['title'],
+                                  size: 16.sp,
+                                  weight: FontWeight.w500,
                                 ),
-                                subtitle: Row(children: [
-                                  AppText(item[index]['quantity'].toString(),
-                                      weight: FontWeight.w400, size: 11.sp),
-                                  5.w.sbW,
-                                  AppText(item[index]["measureUnit"],
-                                      weight: FontWeight.w400, size: 11.sp),
-                                  2.w.sbW,
-                                  AppText(
-                                    "left",
-                                    weight: FontWeight.w300,
-                                    size: 11.sp,
+                                const Spacer(),
+                                trailer(
+                                    date: item[index]["purchase date"],
+                                    text: 'Purchase:')
+                              ],
+                            ),
+                            subtitle: Row(
+                                children: [
+                                  AppText(""
+                                      "${item[index]['quantity'].toString()} ${item[index]["measureUnit"]} left",
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11.sp),
                                   ),
-                                  Spacer(),
+                                  const Spacer(),
                                   trailer(
                                     date: item[index]["expiry date"],
                                     text: "Expiry:",
                                   ),
                                 ]),
-                              ),
-                              10.h.sbH
-                            ],
                           ),
-                        );
-                      },
-                    ),
-                  )
-                ],
-              ));
+                          10.h.sbH
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              )
+            ],
+          ),
+        )
+    );
   }
 }
 
@@ -207,15 +241,23 @@ class trailer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        AppText(
-          text,
-          weight: FontWeight.w400,
-          size: 11,
-        ),
-        AppText(date, weight: FontWeight.w400, size: 11)
-      ],
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: "$text ",
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11.sp),
+          ),
+          TextSpan(
+              text: date,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w400,
+              ),
+          ),
+        ],
+      ),
+      textAlign: TextAlign.end,
     );
   }
 }
