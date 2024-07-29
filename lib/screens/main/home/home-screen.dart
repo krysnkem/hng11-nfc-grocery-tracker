@@ -164,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
               16.sp.sbW,
               Expanded(
                 child: AppButton(
-                  onTap: (){},
+                  onTap: ()=> widget.onNavigationItem(2),
                   isOutline: true,
                   text: "View Shop List",
                 ),
@@ -183,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               AppCard(
                 heights: 28.sp,
-                onTap: ()=> widget.onNavigationItem(2),
+                // onTap: ,
                 widths: 85.sp,
                 padding: 0.0.padA,
                 radius: 24.sp,
