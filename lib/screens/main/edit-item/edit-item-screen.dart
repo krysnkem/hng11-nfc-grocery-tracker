@@ -1,12 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grocey_tag/core/constants/constants.dart';
 import 'package:grocey_tag/core/constants/pallete.dart';
@@ -22,7 +16,8 @@ import '../../../widgets/app_button.dart';
 import '../../../widgets/scan-tage-widget.dart';
 
 class EditItemScreen extends StatefulWidget {
-  const EditItemScreen({super.key});
+  final Map<String, dynamic> data;
+  const EditItemScreen({super.key, required this.data});
 
   @override
   State<EditItemScreen> createState() => _EditItemScreenState();
@@ -38,14 +33,35 @@ class _EditItemScreenState extends State<EditItemScreen> {
 
   @override
   void initState() {
-    // nameController = TextEditingController(text: "Mr Beast Choco");
-    // quantityController = TextEditingController(text: "40");
-    // warningQuantityController = TextEditingController(text: "5");
-    // additionalNoteController = TextEditingController(text: "Buy frozen ones next time.");
-    // purchaseDateController = TextEditingController(text: "03/06/2023");
-    // expiryDateController = TextEditingController(text: "03/06/2023");
+    nameController = TextEditingController(text: widget.data["name"]);
+    quantityController = TextEditingController(text: widget.data["quantity"]);
+    warningQuantityController = TextEditingController(text: widget.data["alertQuantity"]);
+    additionalNoteController = TextEditingController(text: widget.data["additionalNote"]);
+    expires = widget.data["expiryDate"];
+    purchased = widget.data["purchaseDate"];
+    expiryDate =  widget.data["expiryDate"]?? DateTime.now();
+    purchaseDate =  widget.data["purchaseDate"]?? DateTime.now();
+    purchaseDateController = TextEditingController(text: purchased != null? DateUtil.toDates(purchaseDate): null);
+    expiryDateController =TextEditingController(text: expires != null? DateUtil.toDates(expiryDate): null);
+    onChangeData(widget.data["measureUnit"]);
     super.initState();
   }
+
+  submit(){
+    appBottomSheet(ScanTagWidget(onTap:()=> _writeToNfcTag(
+        {
+          'name': nameController.text.trim(),
+          'quantity': quantityController.text.trim(),
+          'alertQuantity': warningQuantityController.text.trim(),
+          'expiryDate': expires,
+          'purchaseDate': purchased,
+          'measureUnit': selectedOption,
+          'additionalNote': additionalNoteController.text.trim(),
+        }
+    ),), height: 462.sp);
+  }
+
+  final formKey = GlobalKey<FormState>();
 
   DateTime purchaseDate = DateTime.now();
   DateTime? purchased;
@@ -65,15 +81,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
     setState(() { });
   }
 
-  submit(){
-    appBottomSheet(ScanTagWidget(onTap:()=> _writeToNfcTag(
-        {
-          'itemName': nameController.text.trim(),
-          'itemQuantity': quantityController.text.trim(),
-          'price': warningQuantityController.text.trim(),
-        }
-    ),), height: 462.sp);
-  }
+
 
   Future<void> _writeToNfcTag(Map<String, dynamic> data) async {
     final NFCService _nfcService = NFCService();
@@ -108,101 +116,104 @@ class _EditItemScreenState extends State<EditItemScreen> {
           ],
         ),
       ),
-      body: GestureDetector(
-        onTap: ()=> FocusManager.instance.primaryFocus?.unfocus(),
-        child: Padding(
-          padding: 16.sp.padA,
-          child: SafeArea(
-            top: false,
-            bottom: true,
-            child: Column(
-              children: [
-                Expanded(
-                  child: ListView(
-                    padding: 0.0.padA,
-                    children: [
-                      AppTextField(
-                        hintText:  "Item Name",
-                        controller: nameController,
-                        hint: "Enter Item Name",
-                        onChanged: onChange,
-                      ),
-                      10.sp.sbH,
-                      AppTextField(
-                        hintText:  "Quantity",
-                        controller: quantityController,
-                        hint: "Enter Item Quantity",
-                        suffixIcon: DropDownMenu(onSelect: onChangeData, data: data, selectedOption: selectedOption,),
-                        contentPadding: 16.sp.padH,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        onChanged: onChange,
-                        keyboardType: TextInputType.number,
-                      ),
-                      10.sp.sbH,
-                      AppTextField(
-                        hintText:  "Quantity for alert",
-                        controller: warningQuantityController,
-                        suffixIcon: DropDownMenu(onSelect: onChangeData, data: data, selectedOption: selectedOption,),
-                        contentPadding: 16.sp.padH,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        hint: "Enter Quantity were warning will be sent",
-                        keyboardType: TextInputType.number,
-                        onChanged: onChange,
-                      ),
-                      10.sp.sbH,
-                      AppTextField(
-                        hintText:  "Purchase Date",
-                        controller: purchaseDateController,
-                        prefix: Icon(Icons.calendar_month_outlined, color: blackColor, size: 25.sp),
-                        onTap: pickPurchaseDate,
-                        hint: "Select Purchase Date",
-                        readonly: true,
-                      ),
-                      10.sp.sbH,
-                      AppTextField(
-                        hintText:  "Expiry Date",
-                        controller: expiryDateController,
-                        prefix: Icon(Icons.calendar_month_outlined, color: blackColor, size: 25.sp,),
-                        onTap: pickExpiryDate,
-                        hint: "Select Expiry Date",
-                        readonly: true,
-                      ),
-                      10.sp.sbH,
-                      AppTextField(
-                        hintText:  "Additional Notes",
-                        controller: additionalNoteController,
-                        onChanged: onChange,
-                        hint: "Add Additional notes",
-                      ),
-                      10.sp.sbH,
+      body: Form(
+        key: formKey,
+        child: GestureDetector(
+          onTap: ()=> FocusManager.instance.primaryFocus?.unfocus(),
+          child: Padding(
+            padding: 16.sp.padA,
+            child: SafeArea(
+              top: false,
+              bottom: true,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView(
+                      padding: 0.0.padA,
+                      children: [
+                        AppTextField(
+                          hintText:  "Item Name",
+                          controller: nameController,
+                          hint: "Enter Item Name",
+                          onChanged: onChange,
+                        ),
+                        10.sp.sbH,
+                        AppTextField(
+                          hintText:  "Quantity",
+                          controller: quantityController,
+                          hint: "Enter Item Quantity",
+                          suffixIcon: DropDownMenu(onSelect: onChangeData, data: data, selectedOption: selectedOption,),
+                          contentPadding: 16.sp.padH,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          onChanged: onChange,
+                          keyboardType: TextInputType.number,
+                        ),
+                        10.sp.sbH,
+                        AppTextField(
+                          hintText:  "Quantity for alert",
+                          controller: warningQuantityController,
+                          suffixIcon: DropDownMenu(onSelect: onChangeData, data: data, selectedOption: selectedOption,),
+                          contentPadding: 16.sp.padH,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          hint: "Enter Quantity were warning will be sent",
+                          keyboardType: TextInputType.number,
+                          onChanged: onChange,
+                        ),
+                        10.sp.sbH,
+                        AppTextField(
+                          hintText:  "Purchase Date",
+                          controller: purchaseDateController,
+                          prefix: Icon(Icons.calendar_month_outlined, color: blackColor, size: 25.sp),
+                          onTap: pickPurchaseDate,
+                          hint: "Select Purchase Date",
+                          readonly: true,
+                        ),
+                        10.sp.sbH,
+                        AppTextField(
+                          hintText:  "Expiry Date",
+                          controller: expiryDateController,
+                          prefix: Icon(Icons.calendar_month_outlined, color: blackColor, size: 25.sp,),
+                          onTap: pickExpiryDate,
+                          hint: "Select Expiry Date",
+                          readonly: true,
+                        ),
+                        10.sp.sbH,
+                        AppTextField(
+                          hintText:  "Additional Notes",
+                          controller: additionalNoteController,
+                          onChanged: onChange,
+                          hint: "Add Additional notes",
+                        ),
+                        10.sp.sbH,
 
+                      ],
+                    )
+                  ),
+                  16.sp.sbH,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AppButton(
+                          isOutline: true,
+                          text: "Cancel",
+                          onTap: navigationService.goBack,
+                        ),
+                      ),
+                      16.sp.sbW,
+                      Expanded(
+                        child: AppButton(
+                          text: "Save",
+                          onTap: formKey.currentState?.validate() == true && selectedOption != null? submit: null,
+                        ),
+                      ),
                     ],
                   )
-                ),
-                16.sp.sbH,
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppButton(
-                        isOutline: true,
-                        text: "Cancel",
-                        onTap: navigationService.goBack,
-                      ),
-                    ),
-                    16.sp.sbW,
-                    Expanded(
-                      child: AppButton(
-                        text: "Save",
-                        onTap: submit,
-                      ),
-                    ),
-                  ],
-                )
-              ],
+                ],
+              ),
             ),
           ),
         ),
