@@ -24,6 +24,8 @@ import 'package:intl/intl.dart';
 
 import '../../../widgets/filter.dart';
 
+List<String> filterItems = ["Date Bought", "Quantity", "Expiry Date"];
+
 // State provider for the search query
 final searchQueryProvider = StateProvider<String>((ref) {
   return '';
@@ -33,14 +35,31 @@ final searchQueryProvider = StateProvider<String>((ref) {
 final filteredItemListProvider = Provider<List<Item>>((ref) {
   final searchQuery = ref.watch(searchQueryProvider).toLowerCase();
   final itemList = ref.watch(inventoryProvider).items;
+  final sortCriteria = ref.watch(sortCriteriaProvider);
 
-  if (searchQuery.isEmpty) {
-    return itemList;
-  } else {
-    return itemList
-        .where((item) => item.name.toLowerCase().contains(searchQuery))
-        .toList();
-  }
+  final filtered = itemList
+      .where((item) => item.name.toLowerCase().contains(searchQuery))
+      .toList();
+  filtered.sort(
+    (a, b) {
+      switch (sortCriteria) {
+        case "Date Bought":
+          return b.purchaseDate.compareTo(a.purchaseDate);
+        case "Quantity":
+          return b.quantity.compareTo(a.quantity);
+        case "Expiry Date":
+          return b.expiryDate.compareTo(a.expiryDate);
+        default:
+          return 0;
+      }
+    },
+  );
+  return filtered;
+});
+
+// State provider for the selected sorting criteria
+final sortCriteriaProvider = StateProvider<String?>((ref) {
+  return null;
 });
 
 class Inventory extends ConsumerStatefulWidget {
@@ -52,12 +71,11 @@ class Inventory extends ConsumerStatefulWidget {
 }
 
 class _InventoryState extends ConsumerState<Inventory> {
-  List<String> filterItems = ["Date Bought", "Quantity", "Expiry Date"];
-
   String? selectedFilter;
 
   onSelect(String val) {
     selectedFilter = val;
+    ref.read(sortCriteriaProvider.notifier).state = val;
   }
 
   bool isempty = false;
@@ -144,7 +162,6 @@ class _InventoryState extends ConsumerState<Inventory> {
                           20.w.sbW,
                           Container(
                             height: 48.sp,
-                            width: 88.sp,
                             alignment: Alignment.center,
                             child: PopupMenuButton<String>(
                               onSelected: onSelect,
