@@ -1,12 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart'
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grocey_tag/core/constants/constants.dart';
 import 'package:grocey_tag/core/constants/pallete.dart';
@@ -267,6 +261,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     purchaseDate = date;
     purchased = date;
     purchaseDateController =TextEditingController(text: DateUtil.toDates(purchaseDate));
+    formKey.currentState?.validate();
     setState(() { });
   }
 
@@ -283,6 +278,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     expiryDate = date;
     expires = date;
     expiryDateController =TextEditingController(text: DateUtil.toDates(expiryDate));
+    formKey.currentState?.validate();
     setState(() { });
   }
 
