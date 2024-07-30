@@ -7,9 +7,9 @@ import '../core/constants/constants.dart';
 import '../widgets/bottomSheet.dart';
 import 'action-pop-up.dart';
 
-appBottomSheet(Widget child, {double? height}) async {
+Future<T?>appBottomSheet<T>(Widget child, {double? height}) async {
   BuildContext context = navigationService.navigatorKey.currentState!.context;
-  showModalBottomSheet(
+  return showModalBottomSheet(
     backgroundColor: Colors.grey.withOpacity(0.05),
     context: context,
     isScrollControlled: true,

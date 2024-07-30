@@ -1,70 +1,195 @@
-import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grocey_tag/core/constants/app_images.dart';
 import 'package:grocey_tag/core/constants/constants.dart';
 import 'package:grocey_tag/core/constants/pallete.dart';
+import 'package:grocey_tag/core/enums/enum.dart';
+import 'package:grocey_tag/core/models/item.dart';
 import 'package:grocey_tag/screens/main/home/widgets/activity-list-item.dart';
 import 'package:grocey_tag/utils/snack_message.dart';
-
 import 'package:grocey_tag/utils/widget_extensions.dart';
 import 'package:grocey_tag/widgets/app-card.dart';
 import 'package:grocey_tag/widgets/app_button.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
+import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
+import 'package:grocey_tag/widgets/scan_tag/show_write_button_sheet.dart';
 
-import '../../../services/nfc_service.dart';
 import '../../../utils/app-bottom-sheet.dart';
-import '../../../utils/get-device-name.dart';
-import '../../../widgets/scan-tage-widget.dart';
-import '../add-item/add-item-screen.dart';
-import '../edit-item/edit-item-screen.dart';
 import 'widgets/dashboard_card.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   final Function(int) onNavigationItem;
   const HomeScreen({super.key, required this.onNavigationItem});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  bool? checkNfcAvailable;
-  final NFCService _nfcService = NFCService();
-  bool _isLoading = false;
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  late Future<bool> checkNfcAvailable;
+  String _itemName = "";
+  int _itemQuantity = 0;
+  double _price = 0.0;
+  double _threshold = 0.0;
 
-  updateTag(bool update){
-    appBottomSheet(ScanTagWidget(onTap: !update? readTag: ()=> _writeToNfcTag({
-      'itemName': "Start",
-      'itemQuantity': 9,
-      'price': 300,
-    }),), height: 462.sp);
+  @override
+  void initState() {
+    super.initState();
+
+    // checkNfcAvailable = ref.read(nfcServiceProvider).isNfcAvailable();
+    checkNfcAvailable = () async {
+      return true;
+    }();
   }
 
-  showOption(){
+  Future<Item?> _showWriteDialog() {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Write to NFC Tag'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                decoration: const InputDecoration(labelText: 'Item Name'),
+                onChanged: (value) {
+                  _itemName = value;
+                },
+              ),
+              TextField(
+                decoration: const InputDecoration(labelText: 'Item Quantity'),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  _itemQuantity = int.tryParse(value) ?? 0;
+                },
+              ),
+              TextField(
+                decoration: const InputDecoration(labelText: 'Price'),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  _price = double.tryParse(value) ?? 0.0;
+                },
+              ),
+              TextField(
+                decoration: const InputDecoration(labelText: 'Treshold'),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  _threshold = double.tryParse(value) ?? 0.0;
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final item = Item(
+                  name: _itemName,
+                  quantity: _itemQuantity,
+                  metric: Metric.unit,
+                  purchaseDate: DateTime.now(),
+                  expiryDate: DateTime(2027),
+                  additionalNote: 'Just a test',
+                  threshold: _threshold.toInt(),
+                );
+
+                Navigator.of(context).pop(item);
+              },
+              child: const Text('Write'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // updateTag(bool update) {
+  //   appBottomSheet(
+  //       ScanTagWidget(
+  //         onTap: !update
+  //             ? readTag
+  //             : () => _writeToNfcTag({
+  //                   'itemName': "Start",
+  //                   'itemQuantity': 9,
+  //                   'price': 300,
+  //                 }),
+  //       ),
+  //       height: 462.sp);
+  // }
+
+  showOption() async {
     appBottomSheet(Column(
       children: [
         AppButton(
-          text: "Update Item",
+          text: "Read",
           isOutline: true,
           borderColor: primaryColor,
           textColor: primaryColor,
-          onTap: (){
-            navigationService.goBack();
-            updateTag(false);
+          onTap: () async {
+            Navigator.of(context).pop();
+            showReadButtonSheet(context: context).then(
+              (result) {
+                log('Result: ${result.status}');
+                if (result.status == NfcReadStatus.success) {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text('What we found'),
+                        content: Text('${(result.data as Item).toJson()}'),
+                      );
+                    },
+                  );
+                }
+
+                if (result.error != null) {
+                  toast(result.error!);
+                }
+
+                if (result.status == NfcReadStatus.notForApp) {
+                  toast('read data is not for app');
+                }
+              },
+            );
           },
         ),
         10.sp.sbH,
         AppButton(
-          text: "Add Item",
+          text: "Write",
           isOutline: true,
           borderColor: primaryColor,
           textColor: primaryColor,
-          onTap: (){
-            navigationService.goBack();
-            updateTag(true);
+          onTap: () async {
+            Navigator.of(context).pop();
+            _showWriteDialog().then(
+              (writeData) async {
+                if (writeData != null) {
+                  log('${writeData.toJson()}');
+                  final result = await showWriteButtonSheet(
+                    context: context,
+                    item: writeData,
+                  );
+
+                  toast('Data Written!');
+
+                  log('Result: ${result.status}');
+
+                  if (result.error != null) {
+                    toast(result.error!);
+                  }
+                }
+              },
+            );
           },
         ),
         10.sp.sbH,
@@ -80,42 +205,37 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _writeToNfcTag(Map<String, dynamic> data) async {
-
     // FOR TESTING
     // navigationService.navigateToWidget(const AddItemScreen());
 
     // USE THIS LATER UNCOMMENT THE BELOW
 
-    if(checkNfcAvailable== true){
-      _nfcService.readNfcTag((data) {
-        navigationService.navigateToWidget(const AddItemScreen());
-      }, (error) {
-        showCustomToast(error);
-      });
-      return;
-    }
-    showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
-
-
+    // if(checkNfcAvailable== true){
+    //   _nfcService.readNfcTag((data) {
+    //     navigationService.navigateToWidget(const EditItemScreen());
+    //   }, (error) {
+    //     showCustomToast(error);
+    //   });
+    //   return;
+    // }
+    // showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
   }
 
-  readTag()async{
-
+  readTag() async {
     // FOR TESTING
     // navigationService.navigateToWidget(const EditItemScreen());
 
     // USE THIS LATER UNCOMMENT THE BELOW
 
-
-    if(checkNfcAvailable== true){
-      _nfcService.readNfcTag((data) {
-      navigationService.navigateToWidget(EditItemScreen(data: jsonDecode(data),));
-      }, (error) {
-          showCustomToast(error);
-      });
-      return;
-    }
-    showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
+    // if(checkNfcAvailable== true){
+    //   _nfcService.readNfcTag((data) {
+    //   navigationService.navigateToWidget(const EditItemScreen());
+    //   }, (error) {
+    //       showCustomToast(error);
+    //   });
+    //   return;
+    // }
+    // showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
   }
 
   List<Map<String, dynamic>> historyItem = [
@@ -149,161 +269,151 @@ class _HomeScreenState extends State<HomeScreen> {
       "measureUnit": "Carton",
       "quantity": 1,
     },
-
   ];
 
   bool show = true;
 
-  init()async{
-    checkNfcAvailable = await _nfcService.isNfcAvailable();
-    print(checkNfcAvailable);
-  }
-
-  @override
-  void initState() {
-    init();
-    super.initState();
-  }
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:show?  AppBar(
-        title: Text("Welcome back!"),
-      ): null,
-      body: show?
-      ListView(
-        padding: EdgeInsets.only(top: 0.sp, left: 16.sp, right: 16.sp),
-        children: [
-          AppText(
-            "Inventory Summary:",
-            size: 16.sp,
-            weight: FontWeight.w500,
-          ),
-          16.sp.sbH,
-          Row(
-            children: [
-              DashBoardCard(
-                count: 15,
-                svgImage: AppImages.inventory,
-                title: "Total items",
-              ),
-              16.sp.sbW,
-              DashBoardCard(
-                count: 3,
-                svgImage: AppImages.trend,
-                title: "Running low",
-              ),
-            ],
-          ),
-          16.sp.sbH,
-          Row(
-            children: [
-              DashBoardCard(
-                count: 6,
-                svgImage: AppImages.warning,
-                title: "Expiring soon",
-              ),
-              16.sp.sbW,
-              DashNavigateCard(
-                onTap: ()=> widget.onNavigationItem(1),
-              ),
-            ],
-          ),
-          30.sp.sbH,
-          AppText(
-            "Quick Actions:",
-            size: 16.sp,
-            weight: FontWeight.w500,
-          ),
-          16.sp.sbH,
-          Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  onTap: showOption,
-                  text: "Scan Item Tag",
-                ),
-              ),
-              16.sp.sbW,
-              Expanded(
-                child: AppButton(
-                  onTap: ()=> widget.onNavigationItem(2),
-                  isOutline: true,
-                  text: "View Shop List",
-                ),
-              ),
-
-            ],
-          ),
-          30.sp.sbH,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              AppText(
-                "Recent Activity:",
-                size: 16.sp,
-                weight: FontWeight.w500,
-              ),
-              AppCard(
-                heights: 28.sp,
-                // onTap: ,
-                widths: 85.sp,
-                padding: 0.0.padA,
-                radius: 24.sp,
-                backgroundColor: const Color(0xFFDEDEDE),
-                child: const Center(child: AppText("View all", weight: FontWeight.w600,)),
-              )
-            ],
-          ),
-          16.sp.sbH,
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: historyItem.length,
-            itemBuilder: (context, index){
-              return ActivityHistoryItem(
-                title: historyItem[index]["title"],
-                date: historyItem[index]["date"],
-                quantity: historyItem[index]["quantity"],
-                measureUnit: historyItem[index]["measureUnit"]
-              );
-            }
-          ),
-          30.sp.sbH
-        ],
-      ):
-      Padding(
-        padding: 16.sp.padA,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset(
-              AppImages.noContent,
-              height: 150.sp,
-              width: 150.sp,
-            ),
-            10.sp.sbH,
-            AppText(
-              "Welcome to GroceyTag",
-              size: 22.sp,
-              isBold: true,
-            ),
-            4.sp.sbH,
-            AppText(
-              "Start managing your groceries\neffectively with NFC tags",
-              align: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            20.sp.sbH,
-            AppButton(
-              onTap: (){},
-              text: "Register Your first Item",
+      appBar: show
+          ? AppBar(
+              title: const Text("Welcome back!"),
             )
-          ],
-        ),
-      ),
+          : null,
+      body: show
+          ? ListView(
+              padding: EdgeInsets.only(top: 0.sp, left: 16.sp, right: 16.sp),
+              children: [
+                AppText(
+                  "Inventory Summary:",
+                  size: 16.sp,
+                  weight: FontWeight.w500,
+                ),
+                16.sp.sbH,
+                Row(
+                  children: [
+                    const DashBoardCard(
+                      count: 15,
+                      svgImage: AppImages.inventory,
+                      title: "Total items",
+                    ),
+                    16.sp.sbW,
+                    const DashBoardCard(
+                      count: 3,
+                      svgImage: AppImages.trend,
+                      title: "Running low",
+                    ),
+                  ],
+                ),
+                16.sp.sbH,
+                Row(
+                  children: [
+                    const DashBoardCard(
+                      count: 6,
+                      svgImage: AppImages.warning,
+                      title: "Expiring soon",
+                    ),
+                    16.sp.sbW,
+                    DashNavigateCard(
+                      onTap: () => widget.onNavigationItem(1),
+                    ),
+                  ],
+                ),
+                30.sp.sbH,
+                AppText(
+                  "Quick Actions:",
+                  size: 16.sp,
+                  weight: FontWeight.w500,
+                ),
+                16.sp.sbH,
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppButton(
+                        onTap: showOption,
+                        text: "Scan Item Tag",
+                      ),
+                    ),
+                    16.sp.sbW,
+                    Expanded(
+                      child: AppButton(
+                        onTap: () => widget.onNavigationItem(2),
+                        isOutline: true,
+                        text: "View Shop List",
+                      ),
+                    ),
+                  ],
+                ),
+                30.sp.sbH,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    AppText(
+                      "Recent Activity:",
+                      size: 16.sp,
+                      weight: FontWeight.w500,
+                    ),
+                    AppCard(
+                      heights: 28.sp,
+                      // onTap: ,
+                      widths: 85.sp,
+                      padding: 0.0.padA,
+                      radius: 24.sp,
+                      backgroundColor: const Color(0xFFDEDEDE),
+                      child: const Center(
+                          child: AppText(
+                        "View all",
+                        weight: FontWeight.w600,
+                      )),
+                    )
+                  ],
+                ),
+                16.sp.sbH,
+                ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: historyItem.length,
+                    itemBuilder: (context, index) {
+                      return ActivityHistoryItem(
+                          title: historyItem[index]["title"],
+                          date: historyItem[index]["date"],
+                          quantity: historyItem[index]["quantity"],
+                          measureUnit: historyItem[index]["measureUnit"]);
+                    }),
+                30.sp.sbH
+              ],
+            )
+          : Padding(
+              padding: 16.sp.padA,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    AppImages.noContent,
+                    height: 150.sp,
+                    width: 150.sp,
+                  ),
+                  10.sp.sbH,
+                  AppText(
+                    "Welcome to GroceyTag",
+                    size: 22.sp,
+                    isBold: true,
+                  ),
+                  4.sp.sbH,
+                  AppText(
+                    "Start managing your groceries\neffectively with NFC tags",
+                    align: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  20.sp.sbH,
+                  AppButton(
+                    onTap: () {},
+                    text: "Register Your first Item",
+                  )
+                ],
+              ),
+            ),
     );
   }
 }

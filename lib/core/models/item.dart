@@ -1,71 +1,83 @@
-
+import 'package:equatable/equatable.dart';
 import 'package:grocey_tag/core/enums/enum.dart';
 
-class Item {
+class Item extends Equatable {
   const Item({
-    required this.id,
     required this.name,
     required this.quantity,
-    required this.unit,
+    required this.metric,
     required this.purchaseDate,
     required this.expiryDate,
     required this.additionalNote,
+    required this.threshold,
   });
-  
-  final String id;
+
   final String name;
   final int quantity;
-  final Unit unit;
+  final Metric metric;
   final DateTime purchaseDate;
   final DateTime expiryDate;
   final String additionalNote;
+  final int threshold;
 
+  // Copy method to create a new instance with modified fields
   Item copyWith({
-    String? id,
     String? name,
     int? quantity,
-    Unit? unit,
+    Metric? metric,
     DateTime? purchaseDate,
     DateTime? expiryDate,
     String? additionalNote,
+    int? threshold,
   }) {
     return Item(
-      id: id ?? this.id,
       name: name ?? this.name,
       quantity: quantity ?? this.quantity,
-      unit: unit ?? this.unit,
+      metric: metric ?? this.metric,
       purchaseDate: purchaseDate ?? this.purchaseDate,
       expiryDate: expiryDate ?? this.expiryDate,
       additionalNote: additionalNote ?? this.additionalNote,
+      threshold: threshold ?? this.threshold,
     );
+  }
+
+  // Utility method to check if item should be added to the shopping list
+  bool get shouldAddToShoppingList {
+    return quantity <= threshold || expiryDate.isBefore(DateTime.now());
   }
 
   @override
   String toString() {
-    return 'Item(id: $id, name: $name, quantity: $quantity, unit: $unit, purchaseDate: $purchaseDate, expiryDate: $expiryDate, additionalNote: $additionalNote)';
+    return 'Item(name: $name, quantity: $quantity, metric: $metric, purchaseDate: $purchaseDate, expiryDate: $expiryDate, additionalNote: $additionalNote, threshold: $threshold)';
   }
 
+  // Serialize to JSON
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'name': name,
       'quantity': quantity,
-      'unit': unit.name,
+      'metric': metric.name,
       'purchaseDate': purchaseDate.toString(),
       'expiryDate': expiryDate.toString(),
       'additionalNote': additionalNote,
+      'threshold': threshold,
     };
   }
 
+  // Deserialize from JSON
   static Item fromJson(Map<String, dynamic> json) {
     return Item(
-      id: json['id'] as String,
       name: json['name'] as String,
       quantity: json['quantity'] as int,
-      unit: Unit.values.byName(json['unit'] as String),
+      metric: Metric.values.byName(json['metric'] as String),
       purchaseDate: DateTime.parse(json['purchaseDate'] as String),
       expiryDate: DateTime.parse(json['expiryDate'] as String),
       additionalNote: json['additionalNote'] as String,
+      threshold: json['threshold'] as int,
     );
   }
+  
+  @override
+  // TODO: implement props
+  List<Object?> get props => [name, quantity, metric, purchaseDate, expiryDate, additionalNote, threshold];
 }
