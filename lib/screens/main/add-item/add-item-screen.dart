@@ -101,21 +101,34 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
       threshold: int.parse(warningQuantityController.text.trim()),
     );
 
-    final result = await showWriteButtonSheet(
+    await showWriteButtonSheet(
       context: context,
       item: writeData,
+    ).then(
+      (result) {
+        if (result.status == NfcWriteStatus.success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: toast('Item saved'),
+              backgroundColor: Colors.transparent,
+            ),
+          );
+          ref.read(inventoryProvider.notifier).register(writeData);
+          Navigator.pop(context);
+        }
+
+        log('Result: ${result.status}');
+
+        if (result.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: toast(result.error!, success: false),
+              backgroundColor: Colors.transparent,
+            ),
+          );
+        }
+      },
     );
-
-    if (result.status == NfcWriteStatus.success) {
-      toast('Item saved');
-      ref.read(inventoryProvider.notifier).register(writeData);
-    }
-
-    log('Result: ${result.status}');
-
-    if (result.error != null) {
-      toast(result.error!);
-    }
   }
 
   @override
@@ -155,6 +168,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                       suffixIcon: DropDownMenu(
                         onSelect: onChangeData,
                         data: data,
+                        hint: 'e.g KG',
                         selectedOption: selectedMetric,
                       ),
                       contentPadding: 16.sp.padH,
@@ -168,6 +182,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                       controller: warningQuantityController,
                       suffixIcon: DropDownMenu(
                         onSelect: onChangeData,
+                        hint: 'e.g KG',
                         data: data,
                         selectedOption: selectedMetric,
                       ),

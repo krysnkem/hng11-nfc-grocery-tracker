@@ -24,6 +24,25 @@ import 'package:intl/intl.dart';
 
 import '../../../widgets/filter.dart';
 
+// State provider for the search query
+final searchQueryProvider = StateProvider<String>((ref) {
+  return '';
+});
+
+// Provider for the filtered list of items based on the search query
+final filteredItemListProvider = Provider<List<Item>>((ref) {
+  final searchQuery = ref.watch(searchQueryProvider).toLowerCase();
+  final itemList = ref.watch(inventoryProvider).items;
+
+  if (searchQuery.isEmpty) {
+    return itemList;
+  } else {
+    return itemList
+        .where((item) => item.name.toLowerCase().contains(searchQuery))
+        .toList();
+  }
+});
+
 class Inventory extends ConsumerStatefulWidget {
   final Function(int) onNavigationItem;
   const Inventory({super.key, required this.onNavigationItem});
@@ -33,69 +52,20 @@ class Inventory extends ConsumerStatefulWidget {
 }
 
 class _InventoryState extends ConsumerState<Inventory> {
+  List<String> filterItems = ["Date Bought", "Quantity", "Expiry Date"];
+
+  String? selectedFilter;
+
+  onSelect(String val) {
+    selectedFilter = val;
+  }
+
+  bool isempty = false;
+
   @override
   Widget build(BuildContext context) {
-    List<String> filterItems = ["Date Bought", "Quantity", "Expiry Date"];
+    final itemList = ref.watch(filteredItemListProvider);
 
-    String? selectedFilter;
-
-    onSelect(String val) {
-      selectedFilter = val;
-    }
-
-    List<Map<String, dynamic>> item = [
-      {
-        "title": "Bell Carrot",
-        "purchase date": "22 January 2024",
-        "expiry date": "22 Aug 2027",
-        "measureUnit": "KG",
-        "quantity": 5,
-      },
-      {
-        "title": "Melon Pods",
-        "purchase date": "22 January 2024",
-        "expiry date": "22 Aug 2027",
-        "measureUnit": "Cups",
-        "quantity": 10,
-      },
-      {
-        "title": "Green Peas",
-        "purchase date": "22 January  2024",
-        "expiry date": "22 Aug 2027",
-        "measureUnit": "KG",
-        "quantity": 2,
-      },
-      {
-        "title": "Fettucine Pasta",
-        "purchase date": "22 January  2024",
-        "expiry date": "22 Aug 2027",
-        "measureUnit": "Packs",
-        "quantity": 2,
-      },
-      {
-        "title": "Indomie",
-        "purchase date": "22 January  2024",
-        "expiry date": "22 Aug 2027",
-        "measureUnit": "Carton",
-        "quantity": 1,
-      },
-      {
-        "title": "Terylyaki",
-        "purchase date": "22 January  2024",
-        "expiry date": "22 Aug 2027",
-        "measureUnit": "litres",
-        "quantity": 4,
-      },
-      {
-        "title": "Japan Macha",
-        "purchase date": "22 January  2024",
-        "expiry date": "22 Aug 2027",
-        "measureUnit": "units",
-        "quantity": 2,
-      },
-    ];
-
-    bool isempty = false;
     return Scaffold(
         appBar: AppBar(
           title: const Text("Inventory"),
@@ -165,6 +135,10 @@ class _InventoryState extends ConsumerState<Inventory> {
                                 size: 26.sp,
                               ),
                               hint: "Search",
+                              onChanged: (value) {
+                                ref.read(searchQueryProvider.notifier).state =
+                                    value;
+                              },
                             ),
                           ),
                           20.w.sbW,
@@ -200,11 +174,10 @@ class _InventoryState extends ConsumerState<Inventory> {
                     15.h.sbH,
                     Expanded(
                       child: Builder(builder: (context) {
-                        final inventory = ref.watch(inventoryProvider);
                         return ListView.builder(
-                          itemCount: inventory.items.length,
+                          itemCount: itemList.length,
                           itemBuilder: (context, index) {
-                            final item = inventory.items[index];
+                            final item = itemList[index];
                             return GestureDetector(
                               onTap: () {
                                 // Navigator.push(

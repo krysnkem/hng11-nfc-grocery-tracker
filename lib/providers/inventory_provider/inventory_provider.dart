@@ -80,6 +80,8 @@ class InventoryStateNotifier extends StateNotifier<InventoryState> {
   Future<void> getInventoryItemsFromDb() async {
     try {
       state = const InventoryState.loading();
+      _items.sort((a, b) => b.purchaseDate.compareTo(a.purchaseDate));
+
       state = InventoryState.loaded(_items);
     } catch (e) {
       state = state.setError(message: e.toString());
@@ -98,6 +100,7 @@ class InventoryStateNotifier extends StateNotifier<InventoryState> {
 
       await StorageService.registerItem(item);
       tempList.add(item);
+      tempList.sort((a, b) => b.purchaseDate.compareTo(a.purchaseDate));
 
       state = InventoryState.loaded(tempList);
       _ref.read(activityProvider.notifier).registerAdd(item);
@@ -125,6 +128,8 @@ class InventoryStateNotifier extends StateNotifier<InventoryState> {
       }
       tempList[index] = item;
       StorageService.update(item);
+      tempList.sort((a, b) => b.purchaseDate.compareTo(a.purchaseDate));
+
       state = InventoryState.loaded(tempList);
       if (oldItem.quantity > item.quantity) {
         _ref
@@ -148,6 +153,7 @@ class InventoryStateNotifier extends StateNotifier<InventoryState> {
       final items = List<Item>.from(state.items);
       items[index] = newItem;
       StorageService.update(item);
+      items.sort((a, b) => b.purchaseDate.compareTo(a.purchaseDate));
 
       state = InventoryState.loaded(items);
       _ref.read(activityProvider.notifier).registerAdd(item);

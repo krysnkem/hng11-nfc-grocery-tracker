@@ -16,6 +16,8 @@ class ActivityStateNotifier extends StateNotifier<ActivityState> {
       state = const ActivityState.loading();
 
       final activities = await StorageService.readAllActivity();
+      activities.sort((a, b) => b.date.compareTo(a.date));
+
       state = ActivityState.loaded(activities);
     } catch (e) {
       state = state.setError(message: e.toString());
@@ -26,6 +28,9 @@ class ActivityStateNotifier extends StateNotifier<ActivityState> {
     await StorageService.registerActivity(activity);
     final activities = List<Activity>.from(state.activities);
     activities.add(activity);
+    activities.sort((a, b) => b.date.compareTo(a.date));
+
+    state = ActivityState.loaded(activities);
   }
 
   void registerAdd(Item item) {

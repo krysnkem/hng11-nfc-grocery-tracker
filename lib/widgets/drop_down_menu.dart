@@ -9,12 +9,14 @@ class DropDownMenu<T> extends StatelessWidget {
   final Function(T) onSelect;
   final List<T> data;
   final bool enabled;
+  final String hint;
   const DropDownMenu({
     super.key,
     required this.onSelect,
     required this.data,
     this.selectedOption,
     this.enabled = true,
+    this.hint = 'Option',
   });
 
   @override
@@ -63,7 +65,7 @@ class DropDownMenu<T> extends StatelessWidget {
                   padding: 10.sp.padV,
                   child: Builder(
                     builder: (context) {
-                      var text = selectedOption?.toString() ?? "Metric";
+                      var text = selectedOption?.toString() ?? hint;
                       if (selectedOption != null && selectedOption is Enum) {
                         text = (selectedOption as Enum).name.toCapitalized();
                       }

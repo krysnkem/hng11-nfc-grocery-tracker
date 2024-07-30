@@ -123,21 +123,29 @@ class _EditItemScreenState extends ConsumerState<EditItemScreen> {
       threshold: int.parse(warningQuantityController.text.trim()),
     );
 
-    final result = await showWriteButtonSheet(
+    await showWriteButtonSheet(
       context: context,
       item: writeData,
+    ).then(
+      (result) {
+        if (result.status == NfcWriteStatus.success) {
+          toast('Item saved');
+          ref.read(inventoryProvider.notifier).updateItem(writeData);
+          Navigator.pop(context);
+        }
+
+        dev.log('Result: ${result.status}');
+
+        if (result.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: toast(result.error!, success: false),
+              backgroundColor: Colors.transparent,
+            ),
+          );
+        }
+      },
     );
-
-    if (result.status == NfcWriteStatus.success) {
-      toast('Item saved');
-      ref.read(inventoryProvider.notifier).updateItem(writeData);
-    }
-
-    dev.log('Result: ${result.status}');
-
-    if (result.error != null) {
-      toast(result.error!);
-    }
   }
 
   @override
@@ -185,6 +193,7 @@ class _EditItemScreenState extends ConsumerState<EditItemScreen> {
                         suffixIcon: DropDownMenu<Metric>(
                           onSelect: onChangeData,
                           enabled: false,
+                          hint: 'e.g KG',
                           data: data,
                           selectedOption: selectedMetric,
                         ),
@@ -201,6 +210,7 @@ class _EditItemScreenState extends ConsumerState<EditItemScreen> {
                         controller: warningQuantityController,
                         suffixIcon: DropDownMenu(
                           enabled: false,
+                          hint: 'e.g KG',
                           onSelect: onChangeData,
                           data: data,
                           selectedOption: selectedMetric,
