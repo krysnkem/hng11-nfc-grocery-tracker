@@ -20,7 +20,7 @@ class NFCService {
 
         try {
           Map<String, dynamic> jsonData = jsonDecode(tempRecord);
-          onReadSuccess(jsonData.toString());
+          onReadSuccess(jsonEncode(jsonData));
         } catch (e) {
           onError('Failed to decode JSON data');
         }

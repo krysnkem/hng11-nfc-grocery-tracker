@@ -31,12 +31,12 @@ void main() {
   FocusManager.instance.primaryFocus?.unfocus();
 
   runApp(const MyApp());
-      (dynamic error, dynamic stack) {
-    if (kDebugMode) {
-      print(error);
-      print(stack);
-    }
-  };
+  //     (dynamic error, dynamic stack) {
+  //   if (kDebugMode) {
+  //     print(error);
+  //     print(stack);
+  //   }
+  // };
 }
 
 class MyApp extends StatelessWidget {

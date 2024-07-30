@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -80,19 +82,19 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _writeToNfcTag(Map<String, dynamic> data) async {
 
     // FOR TESTING
-    navigationService.navigateToWidget(const AddItemScreen());
+    // navigationService.navigateToWidget(const AddItemScreen());
 
     // USE THIS LATER UNCOMMENT THE BELOW
 
-    // if(checkNfcAvailable== true){
-    //   _nfcService.readNfcTag((data) {
-    //     navigationService.navigateToWidget(const EditItemScreen());
-    //   }, (error) {
-    //     showCustomToast(error);
-    //   });
-    //   return;
-    // }
-    // showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
+    if(checkNfcAvailable== true){
+      _nfcService.readNfcTag((data) {
+        navigationService.navigateToWidget(const AddItemScreen());
+      }, (error) {
+        showCustomToast(error);
+      });
+      return;
+    }
+    showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
 
 
   }
@@ -100,20 +102,20 @@ class _HomeScreenState extends State<HomeScreen> {
   readTag()async{
 
     // FOR TESTING
-    navigationService.navigateToWidget(const EditItemScreen());
+    // navigationService.navigateToWidget(const EditItemScreen());
 
     // USE THIS LATER UNCOMMENT THE BELOW
 
 
-    // if(checkNfcAvailable== true){
-    //   _nfcService.readNfcTag((data) {
-    //   navigationService.navigateToWidget(const EditItemScreen());
-    //   }, (error) {
-    //       showCustomToast(error);
-    //   });
-    //   return;
-    // }
-    // showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
+    if(checkNfcAvailable== true){
+      _nfcService.readNfcTag((data) {
+      navigationService.navigateToWidget(EditItemScreen(data: jsonDecode(data),));
+      }, (error) {
+          showCustomToast(error);
+      });
+      return;
+    }
+    showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
   }
 
   List<Map<String, dynamic>> historyItem = [
