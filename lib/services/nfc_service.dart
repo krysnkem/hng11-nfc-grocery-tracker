@@ -17,7 +17,7 @@ class NFCService {
           tempRecord += String.fromCharCodes(
               record.payload.sublist(record.payload[0] + 1));
         }
-
+        print(tempRecord);
         try {
           Map<String, dynamic> jsonData = jsonDecode(tempRecord);
           onReadSuccess(jsonEncode(jsonData));
