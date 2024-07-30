@@ -104,6 +104,7 @@ class StorageService {
         date: DateTime.now().subtract(
           const Duration(days: 2),
         ),
+        metric: Metric.kg,
       )
     ];
   }

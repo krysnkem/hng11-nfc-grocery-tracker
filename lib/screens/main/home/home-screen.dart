@@ -9,6 +9,8 @@ import 'package:grocey_tag/core/constants/constants.dart';
 import 'package:grocey_tag/core/constants/pallete.dart';
 import 'package:grocey_tag/core/enums/enum.dart';
 import 'package:grocey_tag/core/models/item.dart';
+import 'package:grocey_tag/providers/activity_provider/activity_provider.dart';
+import 'package:grocey_tag/providers/inventory_provider/inventory_provider.dart';
 import 'package:grocey_tag/screens/main/add-item/add-item-screen.dart';
 import 'package:grocey_tag/screens/main/edit-item/edit-item-screen.dart';
 import 'package:grocey_tag/screens/main/home/widgets/activity-list-item.dart';
@@ -18,7 +20,6 @@ import 'package:grocey_tag/widgets/app-card.dart';
 import 'package:grocey_tag/widgets/app_button.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
 import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
-import 'package:grocey_tag/widgets/scan_tag/show_write_button_sheet.dart';
 
 import '../../../utils/app-bottom-sheet.dart';
 import 'widgets/confirm_should_over_write.dart';
@@ -179,7 +180,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 (writeData) async {
                   if (writeData != null) {
                     log('${writeData.toJson()}');
-                    
                   }
                 },
               );
@@ -228,40 +228,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Future<void> _writeToNfcTag(Map<String, dynamic> data) async {
-    // FOR TESTING
-    // navigationService.navigateToWidget(const AddItemScreen());
-
-    // USE THIS LATER UNCOMMENT THE BELOW
-
-    // if(checkNfcAvailable== true){
-    //   _nfcService.readNfcTag((data) {
-    //     navigationService.navigateToWidget(const EditItemScreen());
-    //   }, (error) {
-    //     showCustomToast(error);
-    //   });
-    //   return;
-    // }
-    // showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
-  }
-
-  readTag() async {
-    // FOR TESTING
-    // navigationService.navigateToWidget(const EditItemScreen());
-
-    // USE THIS LATER UNCOMMENT THE BELOW
-
-    // if(checkNfcAvailable== true){
-    //   _nfcService.readNfcTag((data) {
-    //   navigationService.navigateToWidget(const EditItemScreen());
-    //   }, (error) {
-    //       showCustomToast(error);
-    //   });
-    //   return;
-    // }
-    // showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
-  }
-
   List<Map<String, dynamic>> historyItem = [
     {
       "title": "Mr Beast Choco",
@@ -299,6 +265,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(inventoryProvider);
+    final notifier = ref.read(inventoryProvider.notifier);
     return Scaffold(
       appBar: show
           ? AppBar(
@@ -317,14 +285,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 16.sp.sbH,
                 Row(
                   children: [
-                    const DashBoardCard(
-                      count: 15,
+                    DashBoardCard(
+                      count: state.items.length,
                       svgImage: AppImages.inventory,
                       title: "Total items",
                     ),
                     16.sp.sbW,
-                    const DashBoardCard(
-                      count: 3,
+                    DashBoardCard(
+                      count: notifier.totalRunningLowItemsCount,
                       svgImage: AppImages.trend,
                       title: "Running low",
                     ),
@@ -333,8 +301,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 16.sp.sbH,
                 Row(
                   children: [
-                    const DashBoardCard(
-                      count: 6,
+                    DashBoardCard(
+                      count: notifier.totalExpiringItemsCount,
                       svgImage: AppImages.warning,
                       title: "Expiring soon",
                     ),
@@ -394,17 +362,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
                 16.sp.sbH,
-                ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: historyItem.length,
-                    itemBuilder: (context, index) {
-                      return ActivityHistoryItem(
-                          title: historyItem[index]["title"],
-                          date: historyItem[index]["date"],
-                          quantity: historyItem[index]["quantity"],
-                          measureUnit: historyItem[index]["measureUnit"]);
-                    }),
+                Builder(builder: (context) {
+                  final activities = ref.watch(activityProvider).activities;
+                  return ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: activities.length,
+                      itemBuilder: (context, index) {
+                        return ActivityHistoryItem(
+                          activity: activities[index],
+                        );
+                      });
+                }),
                 30.sp.sbH
               ],
             )

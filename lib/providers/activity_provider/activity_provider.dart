@@ -33,6 +33,7 @@ class ActivityStateNotifier extends StateNotifier<ActivityState> {
       itemName: item.name,
       quantity: item.quantity,
       operation: Operation.add,
+      metric: item.metric,
     ));
   }
 
@@ -42,6 +43,7 @@ class ActivityStateNotifier extends StateNotifier<ActivityState> {
       itemName: oldItem.name,
       quantity: oldItem.quantity - newItem.quantity,
       operation: Operation.subtract,
+      metric: oldItem.metric,
     ));
   }
 }
