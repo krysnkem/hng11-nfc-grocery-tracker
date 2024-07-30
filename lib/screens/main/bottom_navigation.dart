@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:grocey_tag/screens/main/inventory/inventory.dart';
+import 'package:grocey_tag/screens/main/shoppinglist.dart/shoppinglist.dart';
 
 import '../../utils/pop_up.dart';
 import '../../widgets/botton_nav_component.dart';
@@ -32,9 +33,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
     Inventory(
       onNavigationItem: (int) {},
     ),
-    Scaffold(
-      backgroundColor: Colors.brown,
-    ),
+    ShoppingList(),
     Scaffold(
       backgroundColor: Colors.yellow,
     ),

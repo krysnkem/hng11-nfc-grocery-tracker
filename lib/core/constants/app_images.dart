@@ -13,4 +13,5 @@ class AppImages {
   static const String noResults = "assets/svg/noresults.svg";
   static const String calendars = "assets/svg/calendar.svg";
   static const String scan = "assets/svg/scan.svg";
+  static const String checkit = "assets/svg/checkit.svg";
 }
