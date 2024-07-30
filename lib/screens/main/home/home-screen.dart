@@ -18,11 +18,7 @@ import 'package:grocey_tag/widgets/apptext.dart';
 import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
 import 'package:grocey_tag/widgets/scan_tag/show_write_button_sheet.dart';
 
-import '../../../services/nfc_service.dart';
 import '../../../utils/app-bottom-sheet.dart';
-import '../../../widgets/scan-tage-widget.dart';
-import '../add-item/add-item-screen.dart';
-import '../edit-item/edit-item-screen.dart';
 import 'widgets/dashboard_card.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -35,8 +31,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   late Future<bool> checkNfcAvailable;
-  final NFCService _nfcService = NFCService();
-  final bool _isLoading = false;
   String _itemName = "";
   int _itemQuantity = 0;
   double _price = 0.0;
@@ -45,7 +39,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    checkNfcAvailable = ref.read(nfcServiceProvider).isNfcAvailable();
+
+    // checkNfcAvailable = ref.read(nfcServiceProvider).isNfcAvailable();
+    checkNfcAvailable = () async {
+      return true;
+    }();
   }
 
   Future<Item?> _showWriteDialog() {
@@ -115,19 +113,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  updateTag(bool update) {
-    appBottomSheet(
-        ScanTagWidget(
-          onTap: !update
-              ? readTag
-              : () => _writeToNfcTag({
-                    'itemName': "Start",
-                    'itemQuantity': 9,
-                    'price': 300,
-                  }),
-        ),
-        height: 462.sp);
-  }
+  // updateTag(bool update) {
+  //   appBottomSheet(
+  //       ScanTagWidget(
+  //         onTap: !update
+  //             ? readTag
+  //             : () => _writeToNfcTag({
+  //                   'itemName': "Start",
+  //                   'itemQuantity': 9,
+  //                   'price': 300,
+  //                 }),
+  //       ),
+  //       height: 462.sp);
+  // }
 
   showOption() async {
     appBottomSheet(Column(
@@ -208,7 +206,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _writeToNfcTag(Map<String, dynamic> data) async {
     // FOR TESTING
-    navigationService.navigateToWidget(const AddItemScreen());
+    // navigationService.navigateToWidget(const AddItemScreen());
 
     // USE THIS LATER UNCOMMENT THE BELOW
 
@@ -225,7 +223,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   readTag() async {
     // FOR TESTING
-    navigationService.navigateToWidget(const EditItemScreen());
+    // navigationService.navigateToWidget(const EditItemScreen());
 
     // USE THIS LATER UNCOMMENT THE BELOW
 
@@ -284,117 +282,108 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             )
           : null,
       body: show
-          ? FutureBuilder(
-              future: checkNfcAvailable,
-              builder: (context, snapshot) {
-                if (snapshot.data == false) {
-                  return const Center(child: Text("NFC not available"));
-                }
-
-                return ListView(
-                  padding:
-                      EdgeInsets.only(top: 0.sp, left: 16.sp, right: 16.sp),
+          ? ListView(
+              padding: EdgeInsets.only(top: 0.sp, left: 16.sp, right: 16.sp),
+              children: [
+                AppText(
+                  "Inventory Summary:",
+                  size: 16.sp,
+                  weight: FontWeight.w500,
+                ),
+                16.sp.sbH,
+                Row(
+                  children: [
+                    const DashBoardCard(
+                      count: 15,
+                      svgImage: AppImages.inventory,
+                      title: "Total items",
+                    ),
+                    16.sp.sbW,
+                    const DashBoardCard(
+                      count: 3,
+                      svgImage: AppImages.trend,
+                      title: "Running low",
+                    ),
+                  ],
+                ),
+                16.sp.sbH,
+                Row(
+                  children: [
+                    const DashBoardCard(
+                      count: 6,
+                      svgImage: AppImages.warning,
+                      title: "Expiring soon",
+                    ),
+                    16.sp.sbW,
+                    DashNavigateCard(
+                      onTap: () => widget.onNavigationItem(1),
+                    ),
+                  ],
+                ),
+                30.sp.sbH,
+                AppText(
+                  "Quick Actions:",
+                  size: 16.sp,
+                  weight: FontWeight.w500,
+                ),
+                16.sp.sbH,
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppButton(
+                        onTap: showOption,
+                        text: "Scan Item Tag",
+                      ),
+                    ),
+                    16.sp.sbW,
+                    Expanded(
+                      child: AppButton(
+                        onTap: () => widget.onNavigationItem(2),
+                        isOutline: true,
+                        text: "View Shop List",
+                      ),
+                    ),
+                  ],
+                ),
+                30.sp.sbH,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     AppText(
-                      "Inventory Summary:",
+                      "Recent Activity:",
                       size: 16.sp,
                       weight: FontWeight.w500,
                     ),
-                    16.sp.sbH,
-                    Row(
-                      children: [
-                        const DashBoardCard(
-                          count: 15,
-                          svgImage: AppImages.inventory,
-                          title: "Total items",
-                        ),
-                        16.sp.sbW,
-                        const DashBoardCard(
-                          count: 3,
-                          svgImage: AppImages.trend,
-                          title: "Running low",
-                        ),
-                      ],
-                    ),
-                    16.sp.sbH,
-                    Row(
-                      children: [
-                        const DashBoardCard(
-                          count: 6,
-                          svgImage: AppImages.warning,
-                          title: "Expiring soon",
-                        ),
-                        16.sp.sbW,
-                        DashNavigateCard(
-                          onTap: () => widget.onNavigationItem(1),
-                        ),
-                      ],
-                    ),
-                    30.sp.sbH,
-                    AppText(
-                      "Quick Actions:",
-                      size: 16.sp,
-                      weight: FontWeight.w500,
-                    ),
-                    16.sp.sbH,
-                    Row(
-                      children: [
-                        Expanded(
-                          child: AppButton(
-                            onTap: showOption,
-                            text: "Scan Item Tag",
-                          ),
-                        ),
-                        16.sp.sbW,
-                        Expanded(
-                          child: AppButton(
-                            onTap: () => widget.onNavigationItem(2),
-                            isOutline: true,
-                            text: "View Shop List",
-                          ),
-                        ),
-                      ],
-                    ),
-                    30.sp.sbH,
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        AppText(
-                          "Recent Activity:",
-                          size: 16.sp,
-                          weight: FontWeight.w500,
-                        ),
-                        AppCard(
-                          heights: 28.sp,
-                          // onTap: ,
-                          widths: 85.sp,
-                          padding: 0.0.padA,
-                          radius: 24.sp,
-                          backgroundColor: const Color(0xFFDEDEDE),
-                          child: const Center(
-                              child: AppText(
-                            "View all",
-                            weight: FontWeight.w600,
-                          )),
-                        )
-                      ],
-                    ),
-                    16.sp.sbH,
-                    ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: historyItem.length,
-                        itemBuilder: (context, index) {
-                          return ActivityHistoryItem(
-                              title: historyItem[index]["title"],
-                              date: historyItem[index]["date"],
-                              quantity: historyItem[index]["quantity"],
-                              measureUnit: historyItem[index]["measureUnit"]);
-                        }),
-                    30.sp.sbH
+                    AppCard(
+                      heights: 28.sp,
+                      // onTap: ,
+                      widths: 85.sp,
+                      padding: 0.0.padA,
+                      radius: 24.sp,
+                      backgroundColor: const Color(0xFFDEDEDE),
+                      child: const Center(
+                          child: AppText(
+                        "View all",
+                        weight: FontWeight.w600,
+                      )),
+                    )
                   ],
-                );
-              })
+                ),
+                16.sp.sbH,
+                ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: historyItem.length,
+                    itemBuilder: (context, index) {
+                      return ActivityHistoryItem(
+                          title: historyItem[index]["title"],
+                          date: historyItem[index]["date"],
+                          quantity: historyItem[index]["quantity"],
+                          measureUnit: historyItem[index]["measureUnit"]);
+                    }),
+                30.sp.sbH
+              ],
+            )
           : Padding(
               padding: 16.sp.padA,
               child: Column(

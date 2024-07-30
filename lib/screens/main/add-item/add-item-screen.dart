@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grocey_tag/core/constants/pallete.dart';
 import 'package:grocey_tag/utils/date-util.dart';
 import 'package:grocey_tag/utils/snack_message.dart';
+import 'package:grocey_tag/utils/validator.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
 import 'package:grocey_tag/widgets/text-field-widget.dart';
@@ -28,16 +29,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   TextEditingController purchaseDateController = TextEditingController();
   TextEditingController expiryDateController = TextEditingController();
 
-  @override
-  void initState() {
-    // nameController = TextEditingController(text: "Mr Beast Choco");
-    // quantityController = TextEditingController(text: "40");
-    // warningQuantityController = TextEditingController(text: "5");
-    // additionalNoteController = TextEditingController(text: "Buy frozen ones next time.");
-    // purchaseDateController = TextEditingController(text: "03/06/2023");
-    // expiryDateController = TextEditingController(text: "03/06/2023");
-    super.initState();
-  }
+  final formKey = GlobalKey<FormState>();
 
   DateTime purchaseDate = DateTime.now();
   DateTime? purchased;
@@ -226,9 +218,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
     if (date == null) return null;
     purchaseDate = date;
     purchased = date;
-    purchaseDateController =
-        TextEditingController(text: DateUtil.toDates(purchaseDate));
-    setState(() {});
+    purchaseDateController =TextEditingController(text: DateUtil.toDates(purchaseDate));
+    formKey.currentState?.validate();
+    setState(() { });
   }
 
   Future pickExpiryDate({bool picDate = true}) async {
@@ -237,9 +229,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
     if (date == null) return null;
     expiryDate = date;
     expires = date;
-    expiryDateController =
-        TextEditingController(text: DateUtil.toDates(expiryDate));
-    setState(() {});
+    expiryDateController =TextEditingController(text: DateUtil.toDates(expiryDate));
+    formKey.currentState?.validate();
+    setState(() { });
   }
 }
 
