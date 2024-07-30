@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:grocey_tag/core/constants/app_images.dart';
@@ -9,6 +10,7 @@ import 'package:grocey_tag/core/constants/constants.dart';
 import 'package:grocey_tag/core/constants/pallete.dart';
 import 'package:grocey_tag/core/enums/enum.dart';
 import 'package:grocey_tag/core/models/item.dart';
+import 'package:grocey_tag/providers/inventory_provider/inventory_provider.dart';
 import 'package:grocey_tag/screens/main/add-item/add-item-screen.dart';
 import 'package:grocey_tag/screens/main/edit-item/edit-item-screen.dart';
 import 'package:grocey_tag/screens/main/home/widgets/confirm_should_over_write.dart';
@@ -18,18 +20,19 @@ import 'package:grocey_tag/widgets/app_button.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
 import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
 import 'package:grocey_tag/widgets/text-field-widget.dart';
+import 'package:intl/intl.dart';
 
 import '../../../widgets/filter.dart';
 
-class Inventory extends StatefulWidget {
+class Inventory extends ConsumerStatefulWidget {
   final Function(int) onNavigationItem;
   const Inventory({super.key, required this.onNavigationItem});
 
   @override
-  State<Inventory> createState() => _InventoryState();
+  ConsumerState<Inventory> createState() => _InventoryState();
 }
 
-class _InventoryState extends State<Inventory> {
+class _InventoryState extends ConsumerState<Inventory> {
   @override
   Widget build(BuildContext context) {
     List<String> filterItems = ["Date Bought", "Quantity", "Expiry Date"];
@@ -196,54 +199,60 @@ class _InventoryState extends State<Inventory> {
                     ),
                     15.h.sbH,
                     Expanded(
-                      child: ListView.builder(
-                        itemCount: item.length,
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () {
-                              // Navigator.push(
-                              //     context,
-                              //     MaterialPageRoute(
-                              //         builder: (context) => EditItemScreen()));
-                            },
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  title: Row(
-                                    children: [
+                      child: Builder(builder: (context) {
+                        final inventory = ref.watch(inventoryProvider);
+                        return ListView.builder(
+                          itemCount: inventory.items.length,
+                          itemBuilder: (context, index) {
+                            final item = inventory.items[index];
+                            return GestureDetector(
+                              onTap: () {
+                                // Navigator.push(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //         builder: (context) => EditItemScreen()));
+                              },
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    title: Row(
+                                      children: [
+                                        AppText(
+                                          item.name,
+                                          size: 16.sp,
+                                          weight: FontWeight.w500,
+                                        ),
+                                        const Spacer(),
+                                        trailer(
+                                            date: DateFormat('d MMM yyyy')
+                                                .format(item.purchaseDate),
+                                            text: 'Purchase:')
+                                      ],
+                                    ),
+                                    subtitle: Row(children: [
                                       AppText(
-                                        item[index]['title'],
-                                        size: 16.sp,
-                                        weight: FontWeight.w500,
+                                        ""
+                                        "${item.quantity} ${item.metric.name.toUpperCase()} left",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(fontSize: 11.sp),
                                       ),
                                       const Spacer(),
                                       trailer(
-                                          date: item[index]["purchase date"],
-                                          text: 'Purchase:')
-                                    ],
+                                        date: DateFormat('d MMM yyyy')
+                                            .format(item.expiryDate),
+                                        text: "Expiry:",
+                                      ),
+                                    ]),
                                   ),
-                                  subtitle: Row(children: [
-                                    AppText(
-                                      ""
-                                      "${item[index]['quantity'].toString()} ${item[index]["measureUnit"]} left",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(fontSize: 11.sp),
-                                    ),
-                                    const Spacer(),
-                                    trailer(
-                                      date: item[index]["expiry date"],
-                                      text: "Expiry:",
-                                    ),
-                                  ]),
-                                ),
-                                10.h.sbH
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                                  10.h.sbH
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      }),
                     )
                   ],
                 ),
