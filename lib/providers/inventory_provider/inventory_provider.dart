@@ -111,7 +111,14 @@ class InventoryStateNotifier extends StateNotifier<InventoryState> {
       final index = state.items.indexWhere(
         (element) => element.name == item.name,
       );
+
       final tempList = List<Item>.from(state.items);
+      if (index == -1) {
+        tempList.add(item);
+        state = InventoryState.loaded(tempList);
+        _ref.read(activityProvider.notifier).registerAdd(item);
+        return;
+      }
       final oldItem = tempList[index];
       if (item.quantity == oldItem.quantity) {
         return;

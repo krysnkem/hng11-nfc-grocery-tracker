@@ -76,12 +76,12 @@ class _ShoppingListState extends ConsumerState<ShoppingList> {
                           child: AppButton(
                             onTap: () {
                               ///TODO:REMOVE
-                              navigationService.navigateToWidget(
-                                Restockitem(
-                                  item: item,
-                                ),
-                              );
-                              return;
+                              // navigationService.navigateToWidget(
+                              //   Restockitem(
+                              //     item: item,
+                              //   ),
+                              // );
+                              // return;
 
                               ///TODO:REMOVE
                               showReadButtonSheet(context: context).then(
