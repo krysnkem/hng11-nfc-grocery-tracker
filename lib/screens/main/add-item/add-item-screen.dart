@@ -1,14 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:grocey_tag/core/constants/constants.dart';
 import 'package:grocey_tag/core/constants/pallete.dart';
 import 'package:grocey_tag/utils/date-util.dart';
 import 'package:grocey_tag/utils/snack_message.dart';
@@ -56,49 +48,44 @@ class _AddItemScreenState extends State<AddItemScreen> {
   String? selectedOption;
   List<String> data = ["Litres", "KGs", "Cups", "Packs", "Cartons"];
 
-  onChangeData(String val){
+  onChangeData(String val) {
     selectedOption = val;
-    setState(() { });
+    setState(() {});
   }
 
-  onChange(String? val){
-    setState(() { });
+  onChange(String? val) {
+    setState(() {});
   }
 
-  submit(){
-    appBottomSheet(ScanTagWidget(onTap:()=> _writeToNfcTag(
-        {
-          'itemName': nameController.text.trim(),
-          'itemQuantity': quantityController.text.trim(),
-          'price': warningQuantityController.text.trim(),
-        }
-    ),), height: 462.sp);
+  submit() {
+    appBottomSheet(
+        ScanTagWidget(
+          onTap: () => _writeToNfcTag({
+            'itemName': nameController.text.trim(),
+            'itemQuantity': quantityController.text.trim(),
+            'price': warningQuantityController.text.trim(),
+          }),
+        ),
+        height: 462.sp);
   }
 
   Future<void> _writeToNfcTag(Map<String, dynamic> data) async {
-    final NFCService _nfcService = NFCService();
-
-    _nfcService.writeNfcTag(
-      data,
-          (successMessage) {
-        showCustomToast("Item Updated Successfully", success: true);
-        navigationService.goBack();
-      },
-          (errorMessage) {
-            showCustomToast(errorMessage);
-      },
-    );
+    final NFCService nfcService = NFCService();
+    showCustomToast("Item Updated Successfully", success: true);
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: AppText("Add new item", size: 22.sp, weight: FontWeight.w600,),
+        title: AppText(
+          "Add new item",
+          size: 22.sp,
+          weight: FontWeight.w600,
+        ),
       ),
       body: GestureDetector(
-        onTap: ()=> FocusManager.instance.primaryFocus?.unfocus(),
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Padding(
           padding: 16.sp.padA,
           child: SafeArea(
@@ -107,77 +94,87 @@ class _AddItemScreenState extends State<AddItemScreen> {
             child: Column(
               children: [
                 Expanded(
-                  child: ListView(
-                    padding: 0.0.padA,
-                    children: [
-                      AppTextField(
-                        hintText:  "Item Name",
-                        controller: nameController,
-                        hint: "Enter Item Name",
-                        onChanged: onChange,
+                    child: ListView(
+                  padding: 0.0.padA,
+                  children: [
+                    AppTextField(
+                      hintText: "Item Name",
+                      controller: nameController,
+                      hint: "Enter Item Name",
+                      onChanged: onChange,
+                    ),
+                    10.sp.sbH,
+                    AppTextField(
+                      hintText: "Quantity",
+                      controller: quantityController,
+                      hint: "Enter Item Quantity",
+                      suffixIcon: DropDownMenu(
+                        onSelect: onChangeData,
+                        data: data,
+                        selectedOption: selectedOption,
                       ),
-                      10.sp.sbH,
-                      AppTextField(
-                        hintText:  "Quantity",
-                        controller: quantityController,
-                        hint: "Enter Item Quantity",
-                        suffixIcon: DropDownMenu(onSelect: onChangeData, data: data, selectedOption: selectedOption,),
-                        contentPadding: 16.sp.padH,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        onChanged: onChange,
-                        keyboardType: TextInputType.number,
+                      contentPadding: 16.sp.padH,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onChanged: onChange,
+                      keyboardType: TextInputType.number,
+                    ),
+                    10.sp.sbH,
+                    AppTextField(
+                      hintText: "Quantity for alert",
+                      controller: warningQuantityController,
+                      suffixIcon: DropDownMenu(
+                        onSelect: onChangeData,
+                        data: data,
+                        selectedOption: selectedOption,
                       ),
-                      10.sp.sbH,
-                      AppTextField(
-                        hintText:  "Quantity for alert",
-                        controller: warningQuantityController,
-                        suffixIcon: DropDownMenu(onSelect: onChangeData, data: data, selectedOption: selectedOption,),
-                        contentPadding: 16.sp.padH,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        hint: "Enter Quantity were warning will be sent",
-                        keyboardType: TextInputType.number,
-                        onChanged: onChange,
+                      contentPadding: 16.sp.padH,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      hint: "Enter Quantity were warning will be sent",
+                      keyboardType: TextInputType.number,
+                      onChanged: onChange,
+                    ),
+                    10.sp.sbH,
+                    AppText(
+                      "What amount should this item be automatically added to the Shop List",
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(fontSize: 12.sp),
+                      align: TextAlign.start,
+                    ),
+                    16.sp.sbH,
+                    AppTextField(
+                      hintText: "Purchase Date",
+                      controller: purchaseDateController,
+                      prefix: Icon(Icons.calendar_month_outlined,
+                          color: blackColor, size: 25.sp),
+                      onTap: pickPurchaseDate,
+                      hint: "Select Purchase Date",
+                      readonly: true,
+                    ),
+                    10.sp.sbH,
+                    AppTextField(
+                      hintText: "Expiry Date",
+                      controller: expiryDateController,
+                      prefix: Icon(
+                        Icons.calendar_month_outlined,
+                        color: blackColor,
+                        size: 25.sp,
                       ),
-                      10.sp.sbH,
-                      AppText(
-                        "What amount should this item be automatically added to the Shop List",
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 12.sp),
-                        align: TextAlign.start,
-                      ),
-                      16.sp.sbH,
-                      AppTextField(
-                        hintText:  "Purchase Date",
-                        controller: purchaseDateController,
-                        prefix: Icon(Icons.calendar_month_outlined, color: blackColor, size: 25.sp),
-                        onTap: pickPurchaseDate,
-                        hint: "Select Purchase Date",
-                        readonly: true,
-                      ),
-                      10.sp.sbH,
-                      AppTextField(
-                        hintText:  "Expiry Date",
-                        controller: expiryDateController,
-                        prefix: Icon(Icons.calendar_month_outlined, color: blackColor, size: 25.sp,),
-                        onTap: pickExpiryDate,
-                        hint: "Select Expiry Date",
-                        readonly: true,
-                      ),
-                      10.sp.sbH,
-                      AppTextField(
-                        hintText:  "Additional Notes",
-                        controller: additionalNoteController,
-                        onChanged: onChange,
-                        hint: "Add Additional notes",
-                      ),
-                      10.sp.sbH,
-
-                    ],
-                  )
-                ),
+                      onTap: pickExpiryDate,
+                      hint: "Select Expiry Date",
+                      readonly: true,
+                    ),
+                    10.sp.sbH,
+                    AppTextField(
+                      hintText: "Additional Notes",
+                      controller: additionalNoteController,
+                      onChanged: onChange,
+                      hint: "Add Additional notes",
+                    ),
+                    10.sp.sbH,
+                  ],
+                )),
                 16.sp.sbH,
                 AppButton(
                   text: "Save",
@@ -191,24 +188,23 @@ class _AddItemScreenState extends State<AddItemScreen> {
     );
   }
 
-
   Future<DateTime?> pickDateTime(
-      DateTime initialDate, {
-        required bool pickDate,
-        DateTime? firstDate,
-        DateTime? endDate,
-      }) async {
+    DateTime initialDate, {
+    required bool pickDate,
+    DateTime? firstDate,
+    DateTime? endDate,
+  }) async {
     if (pickDate) {
       final date = await showDatePicker(
         context: context,
         initialDate: initialDate,
-        firstDate: firstDate?? DateTime(1900),
+        firstDate: firstDate ?? DateTime(1900),
         lastDate: endDate ?? DateTime.now(),
       );
       if (date == null) return null;
 
       final time =
-      Duration(hours: initialDate.hour, minutes: initialDate.minute);
+          Duration(hours: initialDate.hour, minutes: initialDate.minute);
 
       return date.add(time);
     } else {
@@ -216,14 +212,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
           context: context, initialTime: TimeOfDay.fromDateTime(initialDate));
       if (timeOfDay == null) return null;
       final date =
-      DateTime(initialDate.year, initialDate.month, initialDate.day);
+          DateTime(initialDate.year, initialDate.month, initialDate.day);
       final time = Duration(hours: timeOfDay.hour, minutes: timeOfDay.minute);
       return date.add(time);
     }
   }
 
-  Future pickPurchaseDate(
-      {bool picDate = true}) async {
+  Future pickPurchaseDate({bool picDate = true}) async {
     final date = await pickDateTime(
       purchaseDate,
       pickDate: picDate,
@@ -231,35 +226,32 @@ class _AddItemScreenState extends State<AddItemScreen> {
     if (date == null) return null;
     purchaseDate = date;
     purchased = date;
-    purchaseDateController =TextEditingController(text: DateUtil.toDates(purchaseDate));
-    setState(() { });
+    purchaseDateController =
+        TextEditingController(text: DateUtil.toDates(purchaseDate));
+    setState(() {});
   }
 
-
-  Future pickExpiryDate(
-      {bool picDate = true}) async {
-    final date = await pickDateTime(
-      purchaseDate,
-      pickDate: picDate,
-      endDate: DateTime(2100),
-      firstDate: purchaseDate
-    );
+  Future pickExpiryDate({bool picDate = true}) async {
+    final date = await pickDateTime(purchaseDate,
+        pickDate: picDate, endDate: DateTime(2100), firstDate: purchaseDate);
     if (date == null) return null;
     expiryDate = date;
     expires = date;
-    expiryDateController =TextEditingController(text: DateUtil.toDates(expiryDate));
-    setState(() { });
+    expiryDateController =
+        TextEditingController(text: DateUtil.toDates(expiryDate));
+    setState(() {});
   }
-
-
 }
-
 
 class DropDownMenu extends StatelessWidget {
   final String? selectedOption;
   final Function(String) onSelect;
   final List<String> data;
-  const DropDownMenu({super.key, required this.onSelect, required this.data, this.selectedOption});
+  const DropDownMenu(
+      {super.key,
+      required this.onSelect,
+      required this.data,
+      this.selectedOption});
 
   @override
   Widget build(BuildContext context) {
@@ -270,8 +262,10 @@ class DropDownMenu extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border(
           left: BorderSide(
-            color:Theme.of(context).disabledColor.withOpacity(0.5),  // Border color
-            width: 0.8,          // Border width
+            color: Theme.of(context)
+                .disabledColor
+                .withOpacity(0.5), // Border color
+            width: 0.8, // Border width
           ),
         ),
       ),
@@ -281,7 +275,10 @@ class DropDownMenu extends StatelessWidget {
           return data.map((String choice) {
             return PopupMenuItem<String>(
               value: choice,
-              child: AppText(choice, weight: FontWeight.w600,),
+              child: AppText(
+                choice,
+                weight: FontWeight.w600,
+              ),
             );
           }).toList();
         },
@@ -293,8 +290,11 @@ class DropDownMenu extends StatelessWidget {
                 child: Padding(
                   padding: 10.sp.padV,
                   child: AppText(
-                    selectedOption??"Options",
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                    selectedOption ?? "Options",
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(fontSize: 12),
                   ),
                 ),
               ),

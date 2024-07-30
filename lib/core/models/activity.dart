@@ -28,6 +28,18 @@ class Activity {
     );
   }
 
+  static Activity generate(
+      {required String itemName,
+      required int quantity,
+      required Operation operation}) {
+    return Activity(
+      itemName: itemName,
+      quantity: quantity,
+      operation: operation,
+      date: DateTime.now(),
+    );
+  }
+
   @override
   String toString() {
     return 'Quantity(item: ${itemName.toString()}, qty: quantity, operation: ${operation.name}, date: $date)';

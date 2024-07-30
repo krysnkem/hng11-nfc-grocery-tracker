@@ -3,7 +3,6 @@ import 'package:grocey_tag/core/enums/enum.dart';
 import 'package:grocey_tag/core/models/activity.dart';
 import 'package:grocey_tag/core/models/item.dart';
 
-
 class FlutterSecureStorageService {
   FlutterSecureStorage storage = const FlutterSecureStorage();
 
@@ -28,7 +27,6 @@ class FlutterSecureStorageService {
     return await storage.containsKey(key: key!);
   }
 }
-
 
 // so our storage would be for items and activity
 // for items, we
@@ -60,13 +58,13 @@ class StorageService {
       return itemNames
           .map(
             (eachItem) => Item(
-                id: eachItem,
                 name: eachItem,
                 quantity: 10,
-                unit: Unit.litre,
+                metric: Metric.litre,
                 purchaseDate: DateTime.now(),
                 expiryDate: DateTime(2024),
-                additionalNote: 'This is $eachItem'),
+                additionalNote: 'This is $eachItem',
+                threshold: 7),
           )
           .toList();
     } catch (e) {

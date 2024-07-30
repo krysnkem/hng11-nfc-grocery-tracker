@@ -78,24 +78,24 @@ class _MyHomePageState extends State<MyHomePage> {
       _isLoading = true;
     });
 
-    _nfcService.readNfcTag(
-      (data) {
-        setState(() {
-          _readFromNfcTag = data;
-          _isLoading = false;
-        });
-      },
-      (error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error),
-          ),
-        );
-        setState(() {
-          _isLoading = false;
-        });
-      },
-    );
+    // _nfcService.readNfcTag(
+    //   (data) {
+    //     setState(() {
+    //       _readFromNfcTag = data;
+    //       _isLoading = false;
+    //     });
+    //   },
+    //   (error) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(
+    //         content: Text(error),
+    //       ),
+    //     );
+    //     setState(() {
+    //       _isLoading = false;
+    //     });
+    //   },
+    // );
   }
 
   Future<void> _writeToNfcTag(Map<String, dynamic> data) async {
@@ -103,29 +103,29 @@ class _MyHomePageState extends State<MyHomePage> {
       _isLoading = true;
     });
 
-    _nfcService.writeNfcTag(
-      data,
-      (successMessage) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(successMessage),
-          ),
-        );
-        setState(() {
-          _isLoading = false;
-        });
-      },
-      (errorMessage) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-          ),
-        );
-        setState(() {
-          _isLoading = false;
-        });
-      },
-    );
+    // _nfcService.writeNfcTag(
+    //   data,
+    //   (successMessage) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(
+    //         content: Text(successMessage),
+    //       ),
+    //     );
+    //     setState(() {
+    //       _isLoading = false;
+    //     });
+    //   },
+    //   (errorMessage) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(
+    //         content: Text(errorMessage),
+    //       ),
+    //     );
+    //     setState(() {
+    //       _isLoading = false;
+    //     });
+    //   },
+    // );
   }
 
   void _showWriteDialog() {
