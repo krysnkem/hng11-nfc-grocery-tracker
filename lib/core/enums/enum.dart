@@ -7,6 +7,17 @@ enum Metric {
   unit,
 }
 
-enum NfcReadStatus { success, error, empty, notForApp, cancel }
+enum NfcReadStatus {
+  success,
+  error,
+  empty,
+  notForApp,
+  cancel,
+}
 
-enum NfcWriteStatus { success, error, overwrite, cancel }
+enum NfcWriteStatus {
+  success,
+  error,
+  overwrite,
+  cancel,
+}

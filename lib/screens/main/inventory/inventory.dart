@@ -1,30 +1,42 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-
 import 'package:grocey_tag/core/constants/app_images.dart';
+import 'package:grocey_tag/core/constants/constants.dart';
 import 'package:grocey_tag/core/constants/pallete.dart';
+import 'package:grocey_tag/core/enums/enum.dart';
+import 'package:grocey_tag/core/models/item.dart';
+import 'package:grocey_tag/screens/main/add-item/add-item-screen.dart';
+import 'package:grocey_tag/screens/main/edit-item/edit-item-screen.dart';
+import 'package:grocey_tag/screens/main/home/widgets/confirm_should_over_write.dart';
+import 'package:grocey_tag/utils/snack_message.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
 import 'package:grocey_tag/widgets/app_button.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
-import 'package:grocey_tag/widgets/searchbar.dart';
+import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
 import 'package:grocey_tag/widgets/text-field-widget.dart';
 
 import '../../../widgets/filter.dart';
-import '../edit-item/edit-item-screen.dart';
 
-class Inventory extends StatelessWidget {
+class Inventory extends StatefulWidget {
   final Function(int) onNavigationItem;
   const Inventory({super.key, required this.onNavigationItem});
 
+  @override
+  State<Inventory> createState() => _InventoryState();
+}
+
+class _InventoryState extends State<Inventory> {
   @override
   Widget build(BuildContext context) {
     List<String> filterItems = ["Date Bought", "Quantity", "Expiry Date"];
 
     String? selectedFilter;
 
-    onSelect(String val){
+    onSelect(String val) {
       selectedFilter = val;
     }
 
@@ -85,10 +97,13 @@ class Inventory extends StatelessWidget {
         appBar: AppBar(
           title: const Text("Inventory"),
           actions: [
-            SvgPicture.asset(
-              AppImages.addlist,
-              height: 24.sp,
-              width: 24.sp,
+            IconButton(
+              onPressed: onAddItem,
+              icon: SvgPicture.asset(
+                AppImages.addlist,
+                height: 24.sp,
+                width: 24.sp,
+              ),
             ),
             16.w.sbW
           ],
@@ -124,108 +139,149 @@ class Inventory extends StatelessWidget {
                       text: "Confused? Learn how it works ",
                       style: TextStyle(color: blackColor),
                     ),
-                    TextSpan(text: "here", style: TextStyle(color: Colors.grey))
+                    const TextSpan(
+                        text: "here", style: TextStyle(color: Colors.grey))
                   ]))
                 ],
               )
-            :
-        GestureDetector(
-          onTap: ()=> FocusManager.instance.primaryFocus?.unfocus(),
-          child: Column(
-            children: [
-              Padding(
-                padding: 16.sp.padH,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+            : GestureDetector(
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                child: Column(
                   children: [
-                    Expanded(
-                      child: AppTextField(
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16.sp, vertical: 7.sp),
-                        prefix: Icon(
-                          CupertinoIcons.search,
-                          size: 26.sp,
-                        ),
-                        hint: "Search",
+                    Padding(
+                      padding: 16.sp.padH,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: AppTextField(
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16.sp, vertical: 7.sp),
+                              prefix: Icon(
+                                CupertinoIcons.search,
+                                size: 26.sp,
+                              ),
+                              hint: "Search",
+                            ),
+                          ),
+                          20.w.sbW,
+                          Container(
+                            height: 48.sp,
+                            width: 88.sp,
+                            alignment: Alignment.center,
+                            child: PopupMenuButton<String>(
+                              onSelected: onSelect,
+                              itemBuilder: (BuildContext context) {
+                                return filterItems.map((String choice) {
+                                  return PopupMenuItem<String>(
+                                    value: choice,
+                                    child: AppText(
+                                      choice,
+                                      weight: FontWeight.w400,
+                                      size: 12.sp,
+                                    ),
+                                  );
+                                }).toList();
+                              },
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Filterbutton(),
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
                       ),
                     ),
-                    20.w.sbW,
-                    Container(
-                      height: 48.sp,
-                      width: 88.sp,
-                      alignment: Alignment.center,
-                      child: PopupMenuButton<String>(
-                        onSelected: onSelect,
-                        itemBuilder: (BuildContext context) {
-                          return filterItems.map((String choice) {
-                            return PopupMenuItem<String>(
-                              value: choice,
-                              child: AppText(choice, weight: FontWeight.w400, size: 12.sp,),
-                            );
-                          }).toList();
+                    15.h.sbH,
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: item.length,
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              // Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //         builder: (context) => EditItemScreen()));
+                            },
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  title: Row(
+                                    children: [
+                                      AppText(
+                                        item[index]['title'],
+                                        size: 16.sp,
+                                        weight: FontWeight.w500,
+                                      ),
+                                      const Spacer(),
+                                      trailer(
+                                          date: item[index]["purchase date"],
+                                          text: 'Purchase:')
+                                    ],
+                                  ),
+                                  subtitle: Row(children: [
+                                    AppText(
+                                      ""
+                                      "${item[index]['quantity'].toString()} ${item[index]["measureUnit"]} left",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(fontSize: 11.sp),
+                                    ),
+                                    const Spacer(),
+                                    trailer(
+                                      date: item[index]["expiry date"],
+                                      text: "Expiry:",
+                                    ),
+                                  ]),
+                                ),
+                                10.h.sbH
+                              ],
+                            ),
+                          );
                         },
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Filterbutton(),
-                          ],
-                        ),
                       ),
                     )
                   ],
                 ),
-              ),
-              15.h.sbH,
-              Expanded(
-                child: ListView.builder(
-                  itemCount: item.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () {
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //         builder: (context) => EditItemScreen()));
-                      },
-                      child: Column(
-                        children: [
-                          ListTile(
-                            title: Row(
-                              children: [
-                                AppText(
-                                  item[index]['title'],
-                                  size: 16.sp,
-                                  weight: FontWeight.w500,
-                                ),
-                                const Spacer(),
-                                trailer(
-                                    date: item[index]["purchase date"],
-                                    text: 'Purchase:')
-                              ],
-                            ),
-                            subtitle: Row(
-                                children: [
-                                  AppText(""
-                                      "${item[index]['quantity'].toString()} ${item[index]["measureUnit"]} left",
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11.sp),
-                                  ),
-                                  const Spacer(),
-                                  trailer(
-                                    date: item[index]["expiry date"],
-                                    text: "Expiry:",
-                                  ),
-                                ]),
-                          ),
-                          10.h.sbH
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              )
-            ],
-          ),
-        )
-    );
+              ));
+  }
+
+  void onAddItem() {
+    () {
+      showReadButtonSheet(context: context).then(
+        (result) async {
+          log('Result: ${result.status}');
+          if (result.status == NfcReadStatus.success) {
+            final item = result.data as Item;
+            navigationService.navigateToWidget(EditItemScreen(item: item));
+            return;
+          }
+
+          if (result.status == NfcReadStatus.empty) {
+            return;
+          }
+
+          if (result.status == NfcReadStatus.notForApp) {
+            toast('Data is not for this app');
+            final shouldOverwrite = await confirmShouldOverWrite(context);
+
+            if (shouldOverwrite) {
+              navigationService.navigateToWidget(const AddItemScreen());
+            }
+            return;
+          }
+
+          if (result.error != null) {
+            toast(result.error!);
+          }
+        },
+      );
+    };
+    navigationService.navigateToWidget(const AddItemScreen());
   }
 }
 
@@ -246,14 +302,17 @@ class trailer extends StatelessWidget {
         children: [
           TextSpan(
             text: "$text ",
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11.sp),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(fontSize: 11.sp),
           ),
           TextSpan(
-              text: date,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            text: date,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w400,
-              ),
+                ),
           ),
         ],
       ),

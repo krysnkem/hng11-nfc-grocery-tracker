@@ -9,6 +9,8 @@ import 'package:grocey_tag/core/constants/constants.dart';
 import 'package:grocey_tag/core/constants/pallete.dart';
 import 'package:grocey_tag/core/enums/enum.dart';
 import 'package:grocey_tag/core/models/item.dart';
+import 'package:grocey_tag/screens/main/add-item/add-item-screen.dart';
+import 'package:grocey_tag/screens/main/edit-item/edit-item-screen.dart';
 import 'package:grocey_tag/screens/main/home/widgets/activity-list-item.dart';
 import 'package:grocey_tag/utils/snack_message.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
@@ -19,6 +21,7 @@ import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
 import 'package:grocey_tag/widgets/scan_tag/show_write_button_sheet.dart';
 
 import '../../../utils/app-bottom-sheet.dart';
+import 'widgets/confirm_should_over_write.dart';
 import 'widgets/dashboard_card.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -128,80 +131,101 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // }
 
   showOption() async {
-    appBottomSheet(Column(
-      children: [
-        AppButton(
-          text: "Read",
-          isOutline: true,
-          borderColor: primaryColor,
-          textColor: primaryColor,
-          onTap: () async {
-            Navigator.of(context).pop();
-            showReadButtonSheet(context: context).then(
-              (result) {
-                log('Result: ${result.status}');
-                if (result.status == NfcReadStatus.success) {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: const Text('What we found'),
-                        content: Text('${(result.data as Item).toJson()}'),
-                      );
-                    },
-                  );
-                }
-
-                if (result.error != null) {
-                  toast(result.error!);
-                }
-
-                if (result.status == NfcReadStatus.notForApp) {
-                  toast('read data is not for app');
-                }
-              },
-            );
-          },
-        ),
-        10.sp.sbH,
-        AppButton(
-          text: "Write",
-          isOutline: true,
-          borderColor: primaryColor,
-          textColor: primaryColor,
-          onTap: () async {
-            Navigator.of(context).pop();
-            _showWriteDialog().then(
-              (writeData) async {
-                if (writeData != null) {
-                  log('${writeData.toJson()}');
-                  final result = await showWriteButtonSheet(
-                    context: context,
-                    item: writeData,
-                  );
-
-                  toast('Data Written!');
-
+    () {
+      appBottomSheet(Column(
+        children: [
+          AppButton(
+            text: "Read",
+            isOutline: true,
+            borderColor: primaryColor,
+            textColor: primaryColor,
+            onTap: () async {
+              Navigator.of(context).pop();
+              showReadButtonSheet(context: context).then(
+                (result) {
                   log('Result: ${result.status}');
+                  if (result.status == NfcReadStatus.success) {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('What we found'),
+                          content: Text('${(result.data as Item).toJson()}'),
+                        );
+                      },
+                    );
+                  }
 
                   if (result.error != null) {
                     toast(result.error!);
                   }
-                }
-              },
-            );
-          },
-        ),
-        10.sp.sbH,
-        AppButton(
-          text: "Cancel",
-          onTap: navigationService.goBack,
-          backGroundColor: Colors.red,
-          borderColor: Colors.red,
-        ),
-        16.sp.sbH
-      ],
-    ));
+
+                  if (result.status == NfcReadStatus.notForApp) {
+                    toast('read data is not for app');
+                  }
+                },
+              );
+            },
+          ),
+          10.sp.sbH,
+          AppButton(
+            text: "Write",
+            isOutline: true,
+            borderColor: primaryColor,
+            textColor: primaryColor,
+            onTap: () async {
+              Navigator.of(context).pop();
+              _showWriteDialog().then(
+                (writeData) async {
+                  if (writeData != null) {
+                    log('${writeData.toJson()}');
+                    
+                  }
+                },
+              );
+            },
+          ),
+          10.sp.sbH,
+          AppButton(
+            text: "Cancel",
+            onTap: navigationService.goBack,
+            backGroundColor: Colors.red,
+            borderColor: Colors.red,
+          ),
+          16.sp.sbH
+        ],
+      ));
+    };
+
+    showReadButtonSheet(context: context).then(
+      (result) async {
+        log('Result: ${result.status}');
+        if (result.status == NfcReadStatus.success) {
+          final item = result.data as Item;
+          navigationService.navigateToWidget(EditItemScreen(item: item));
+          return;
+        }
+
+        if (result.status == NfcReadStatus.empty) {
+          navigationService.navigateToWidget(const AddItemScreen());
+          return;
+        }
+
+        if (result.status == NfcReadStatus.notForApp) {
+          toast('Data is not for this app');
+          final shouldOverwrite = await confirmShouldOverWrite(context);
+
+          if (shouldOverwrite) {
+            navigationService.navigateToWidget(const AddItemScreen());
+          }
+          return;
+        }
+
+        if (result.error != null) {
+          toast(result.error!);
+        }
+      },
+    );
   }
 
   Future<void> _writeToNfcTag(Map<String, dynamic> data) async {

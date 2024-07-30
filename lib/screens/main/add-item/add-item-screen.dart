@@ -1,27 +1,31 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grocey_tag/core/constants/pallete.dart';
+import 'package:grocey_tag/core/enums/enum.dart';
+import 'package:grocey_tag/core/models/item.dart';
+import 'package:grocey_tag/providers/inventory_provider/inventory_provider.dart';
 import 'package:grocey_tag/utils/date-util.dart';
 import 'package:grocey_tag/utils/snack_message.dart';
-import 'package:grocey_tag/utils/validator.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
+import 'package:grocey_tag/widgets/drop_down_menu.dart';
+import 'package:grocey_tag/widgets/scan_tag/show_write_button_sheet.dart';
 import 'package:grocey_tag/widgets/text-field-widget.dart';
 
-import '../../../services/nfc_service.dart';
-import '../../../utils/app-bottom-sheet.dart';
 import '../../../widgets/app_button.dart';
-import '../../../widgets/scan-tage-widget.dart';
 
-class AddItemScreen extends StatefulWidget {
+class AddItemScreen extends ConsumerStatefulWidget {
   const AddItemScreen({super.key});
 
   @override
-  State<AddItemScreen> createState() => _AddItemScreenState();
+  ConsumerState<AddItemScreen> createState() => _AddItemScreenState();
 }
 
-class _AddItemScreenState extends State<AddItemScreen> {
+class _AddItemScreenState extends ConsumerState<AddItemScreen> {
   TextEditingController nameController = TextEditingController();
   TextEditingController quantityController = TextEditingController();
   TextEditingController warningQuantityController = TextEditingController();
@@ -37,11 +41,23 @@ class _AddItemScreenState extends State<AddItemScreen> {
   DateTime expiryDate = DateTime.now();
   DateTime? expires;
 
-  String? selectedOption;
-  List<String> data = ["Litres", "KGs", "Cups", "Packs", "Cartons"];
+  Metric? selectedMetric;
+  List<Metric> data = Metric.values;
 
-  onChangeData(String val) {
-    selectedOption = val;
+  @override
+  dispose() {
+    super.dispose();
+    nameController.dispose();
+    quantityController.dispose();
+    warningQuantityController.dispose();
+    additionalNoteController.dispose();
+    purchaseDateController.dispose();
+    expiryDateController.dispose();
+    selectedMetric = data.first;
+  }
+
+  onChangeData(val) {
+    selectedMetric = val;
     setState(() {});
   }
 
@@ -49,21 +65,57 @@ class _AddItemScreenState extends State<AddItemScreen> {
     setState(() {});
   }
 
-  submit() {
-    appBottomSheet(
-        ScanTagWidget(
-          onTap: () => _writeToNfcTag({
-            'itemName': nameController.text.trim(),
-            'itemQuantity': quantityController.text.trim(),
-            'price': warningQuantityController.text.trim(),
-          }),
-        ),
-        height: 462.sp);
+  bool get allFieldsComplete {
+    return nameController.text.isNotEmpty &&
+        nameController.text != ' ' &&
+        quantityController.text.isNotEmpty &&
+        quantityController.text != ' ' &&
+        warningQuantityController.text.isNotEmpty &&
+        warningQuantityController.text != ' ' &&
+        additionalNoteController.text.isNotEmpty &&
+        additionalNoteController.text != ' ' &&
+        purchaseDateController.text.isNotEmpty &&
+        purchaseDateController.text != ' ' &&
+        expiryDateController.text.isNotEmpty &&
+        expiryDateController.text != ' ' &&
+        selectedMetric != null;
   }
 
-  Future<void> _writeToNfcTag(Map<String, dynamic> data) async {
-    final NFCService nfcService = NFCService();
-    showCustomToast("Item Updated Successfully", success: true);
+  submit() async {
+    if (!allFieldsComplete) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: toast('Fill all fields', success: false),
+          backgroundColor: Colors.transparent,
+        ),
+      );
+      return;
+    }
+    final writeData = Item(
+      name: nameController.text.trim(),
+      quantity: int.parse(quantityController.text.trim()),
+      metric: selectedMetric!,
+      purchaseDate: purchaseDate,
+      expiryDate: expiryDate,
+      additionalNote: additionalNoteController.text.trim(),
+      threshold: int.parse(warningQuantityController.text.trim()),
+    );
+
+    final result = await showWriteButtonSheet(
+      context: context,
+      item: writeData,
+    );
+
+    if (result.status == NfcWriteStatus.success) {
+      toast('Item saved');
+      ref.read(inventoryProvider.notifier).register(writeData);
+    }
+
+    log('Result: ${result.status}');
+
+    if (result.error != null) {
+      toast(result.error!);
+    }
   }
 
   @override
@@ -103,7 +155,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                       suffixIcon: DropDownMenu(
                         onSelect: onChangeData,
                         data: data,
-                        selectedOption: selectedOption,
+                        selectedOption: selectedMetric,
                       ),
                       contentPadding: 16.sp.padH,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -117,7 +169,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                       suffixIcon: DropDownMenu(
                         onSelect: onChangeData,
                         data: data,
-                        selectedOption: selectedOption,
+                        selectedOption: selectedMetric,
                       ),
                       contentPadding: 16.sp.padH,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -163,6 +215,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                       controller: additionalNoteController,
                       onChanged: onChange,
                       hint: "Add Additional notes",
+                      maxLength: 20,
                     ),
                     10.sp.sbH,
                   ],
@@ -218,9 +271,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
     if (date == null) return null;
     purchaseDate = date;
     purchased = date;
-    purchaseDateController =TextEditingController(text: DateUtil.toDates(purchaseDate));
+    purchaseDateController =
+        TextEditingController(text: DateUtil.toDates(purchaseDate));
     formKey.currentState?.validate();
-    setState(() { });
+    setState(() {});
   }
 
   Future pickExpiryDate({bool picDate = true}) async {
@@ -229,73 +283,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
     if (date == null) return null;
     expiryDate = date;
     expires = date;
-    expiryDateController =TextEditingController(text: DateUtil.toDates(expiryDate));
+    expiryDateController =
+        TextEditingController(text: DateUtil.toDates(expiryDate));
     formKey.currentState?.validate();
-    setState(() { });
-  }
-}
-
-class DropDownMenu extends StatelessWidget {
-  final String? selectedOption;
-  final Function(String) onSelect;
-  final List<String> data;
-  const DropDownMenu(
-      {super.key,
-      required this.onSelect,
-      required this.data,
-      this.selectedOption});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 48.sp,
-      width: 75.sp,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        border: Border(
-          left: BorderSide(
-            color: Theme.of(context)
-                .disabledColor
-                .withOpacity(0.5), // Border color
-            width: 0.8, // Border width
-          ),
-        ),
-      ),
-      child: PopupMenuButton<String>(
-        onSelected: onSelect,
-        itemBuilder: (BuildContext context) {
-          return data.map((String choice) {
-            return PopupMenuItem<String>(
-              value: choice,
-              child: AppText(
-                choice,
-                weight: FontWeight.w600,
-              ),
-            );
-          }).toList();
-        },
-        child: Row(
-          children: [
-            5.sp.sbW,
-            Expanded(
-              child: FittedBox(
-                child: Padding(
-                  padding: 10.sp.padV,
-                  child: AppText(
-                    selectedOption ?? "Options",
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(fontSize: 12),
-                  ),
-                ),
-              ),
-            ),
-            5.sp.sbW,
-            const Icon(Icons.arrow_drop_down),
-          ],
-        ),
-      ),
-    );
+    setState(() {});
   }
 }
