@@ -76,8 +76,16 @@ class Item extends Equatable {
       threshold: json['threshold'] as int,
     );
   }
-  
+
   @override
   // TODO: implement props
-  List<Object?> get props => [name, quantity, metric, purchaseDate, expiryDate, additionalNote, threshold];
+  List<Object?> get props => [
+        name,
+        quantity,
+        metric,
+        purchaseDate,
+        expiryDate,
+        additionalNote,
+        threshold
+      ];
 }

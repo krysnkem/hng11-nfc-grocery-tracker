@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grocey_tag/core/models/item.dart';
 import 'package:grocey_tag/providers/activity_provider/activity_provider.dart';
-import 'package:grocey_tag/services/storage.service.dart';
+import 'package:grocey_tag/services/storage/storage.service.dart';
 
 import 'inventory_state.dart';
 
