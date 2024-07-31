@@ -85,7 +85,7 @@ These instructions will get you a copy of the project up and running on your loc
 Download App from [here](https://drive.google.com/drive/folders/1KdFtX6edR-zOFsbcWFkky4Oit62ix_h_?usp=drive_link)
 
 ## Figma Link, courtesy of Team Kimiko's amazing designers
-Get the Figma design [here](https://www.figma.com/design/cOk0NbRxqH1taLKaNyPY31/TEAM-KIMIKO-(TELEX)---NFC-PROJECTS-(Copy)?node-id=0-1&t=sdavRg3xNmHxJzIu-0)
+Get the Figma design [here](https://www.figma.com/design/IQcbrxkevs9FzEweXbOH3v/TEAM-KIMIKO-(TELEX)---NFC-PROJECTS?node-id=89-545&t=h3Sf0PQykmJjPVEX-0)
 
 ## Team: Team Kimiko (Telex)
 - [@krysnkem](https://github.com/krysnkem) (GitHub: krysnkem | Slack: @Christian Onyisi)
