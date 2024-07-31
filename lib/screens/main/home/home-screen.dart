@@ -13,7 +13,6 @@ import 'package:grocey_tag/providers/inventory_provider/inventory_provider.dart'
 import 'package:grocey_tag/screens/main/add-item/add-item-screen.dart';
 import 'package:grocey_tag/screens/main/edit-item/edit-item-screen.dart';
 import 'package:grocey_tag/screens/main/home/widgets/activity-list-item.dart';
-import 'package:grocey_tag/utils/snack_message.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
 import 'package:grocey_tag/widgets/app_button.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
@@ -22,6 +21,7 @@ import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
 import '../../../widgets/empty-state.dart';
 import 'widgets/confirm_should_over_write.dart';
 import 'widgets/dashboard_card.dart';
+import 'widgets/show_status_snack_bar.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final Function(int) onNavigationItem;
@@ -131,17 +131,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
 
         if (result.status == NfcReadStatus.notForApp) {
-          toast('Data is not for this app');
+          var message = 'Data is not for this app';
+          showStatusSnackBar(context: context, message: message);
           final shouldOverwrite = await confirmShouldOverWrite(context);
 
           if (shouldOverwrite) {
-            navigationService.navigateToWidget(const AddItemScreen());
+            navigationService.navigateToWidget(
+              const AddItemScreen(
+                overWriteConfirmed: true,
+              ),
+            );
           }
           return;
         }
 
         if (result.error != null) {
-          toast(result.error!);
+          showErrorSnackBar(context: context, message: result.error!);
         }
       },
     );

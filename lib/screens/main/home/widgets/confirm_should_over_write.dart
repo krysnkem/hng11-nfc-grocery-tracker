@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:grocey_tag/core/constants/pallete.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
 
 Future<bool> confirmShouldOverWrite(BuildContext context, {String? title}) {
@@ -25,7 +26,10 @@ Future<bool> confirmShouldOverWrite(BuildContext context, {String? title}) {
                 onPressed: () {
                   Navigator.of(context).pop(true);
                 },
-                child: const Text('Yes'),
+                child: Text(
+                  'Yes',
+                  style: TextStyle(color: primaryColor),
+                ),
               ),
             ],
           )

@@ -8,11 +8,13 @@ import 'package:grocey_tag/core/constants/pallete.dart';
 import 'package:grocey_tag/core/enums/enum.dart';
 import 'package:grocey_tag/core/models/item.dart';
 import 'package:grocey_tag/providers/inventory_provider/inventory_provider.dart';
+import 'package:grocey_tag/screens/main/home/widgets/show_status_snack_bar.dart';
+import 'package:grocey_tag/utils/custom_input_formatter.dart';
 import 'package:grocey_tag/utils/date-util.dart';
-import 'package:grocey_tag/utils/snack_message.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
 import 'package:grocey_tag/widgets/drop_down_menu.dart';
+import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
 import 'package:grocey_tag/widgets/scan_tag/show_write_button_sheet.dart';
 import 'package:grocey_tag/widgets/text-field-widget.dart';
 
@@ -105,36 +107,29 @@ class _RestockitemState extends ConsumerState<Restockitem> {
 
   submit() async {
     if (!allFieldsComplete) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: toast('Fill all fields', success: false),
-          backgroundColor: Colors.transparent,
-        ),
-      );
+      showErrorSnackBar(context: context, message: 'Fill all fields');
       return;
     }
     final writeData = Item(
-      name: nameController.text.trim(),
+      name: nameController.text.trim().trimLeft(),
       quantity: int.parse(quantityController.text.trim()),
       metric: selectedMetric!,
       purchaseDate: purchaseDate,
       expiryDate: expiryDate,
-      additionalNote: additionalNoteController.text.trim(),
+      additionalNote: additionalNoteController.text.trim().trimLeft(),
       threshold: int.parse(warningQuantityController.text.trim()),
     );
+    checkDataBeforeWrite(writeData);
+  }
 
+  Future<void> writeToTag(Item writeData) async {
     await showWriteButtonSheet(
       context: context,
       item: writeData,
     ).then(
       (result) {
         if (result.status == NfcWriteStatus.success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: toast('Item saved'),
-              backgroundColor: Colors.transparent,
-            ),
-          );
+          showStatusSnackBar(context: context, message: 'Item saved');
           ref.read(inventoryProvider.notifier).register(writeData);
           Navigator.pop(context);
         }
@@ -142,12 +137,33 @@ class _RestockitemState extends ConsumerState<Restockitem> {
         log('Result: ${result.status}');
 
         if (result.error != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: toast(result.error!, success: false),
-              backgroundColor: Colors.transparent,
-            ),
-          );
+          showErrorSnackBar(context: context, message: result.error!);
+        }
+      },
+    );
+  }
+
+  Future<void> checkDataBeforeWrite(Item writeData) async {
+    await showReadButtonSheet(context: context).then(
+      (result) async {
+        log('Result: ${result.status}');
+        if (result.status == NfcReadStatus.success) {
+          if (result.data!.name == writeData.name) {
+            await writeToTag(writeData);
+          } else {
+            showErrorSnackBar(context: context, message: "Wrong item tag");
+          }
+
+          return;
+        }
+
+        if (result.status == NfcReadStatus.notForApp ||
+            result.status == NfcReadStatus.empty) {
+          showErrorSnackBar(context: context, message: "Wrong item tag");
+        }
+
+        if (result.error != null) {
+          showErrorSnackBar(context: context, message: result.error!);
         }
       },
     );
@@ -191,6 +207,9 @@ class _RestockitemState extends ConsumerState<Restockitem> {
                       controller: nameController,
                       hint: "Enter Item Name",
                       onChanged: onChange,
+                      inputFormatters: [
+                        CustomInputFormatter(),
+                      ],
                     ),
                     10.sp.sbH,
                     AppTextField(
@@ -265,6 +284,9 @@ class _RestockitemState extends ConsumerState<Restockitem> {
                       onChanged: onChange,
                       hint: "Add Additional notes",
                       maxLength: 20,
+                      inputFormatters: [
+                        CustomInputFormatter(),
+                      ],
                     ),
                     10.sp.sbH,
                   ],
