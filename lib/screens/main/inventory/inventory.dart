@@ -14,7 +14,7 @@ import 'package:grocey_tag/providers/inventory_provider/inventory_provider.dart'
 import 'package:grocey_tag/screens/main/add-item/add-item-screen.dart';
 import 'package:grocey_tag/screens/main/edit-item/edit-item-screen.dart';
 import 'package:grocey_tag/screens/main/home/widgets/confirm_should_over_write.dart';
-import 'package:grocey_tag/utils/snack_message.dart';
+import 'package:grocey_tag/screens/main/home/widgets/show_status_snack_bar.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
 import 'package:grocey_tag/widgets/app_button.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
@@ -283,7 +283,6 @@ class _InventoryState extends ConsumerState<Inventory> {
           }
 
           if (result.status == NfcReadStatus.notForApp) {
-            toast('Data is not for this app');
             final shouldOverwrite = await confirmShouldOverWrite(context);
 
             if (shouldOverwrite) {
@@ -293,7 +292,7 @@ class _InventoryState extends ConsumerState<Inventory> {
           }
 
           if (result.error != null) {
-            toast(result.error!);
+            showErrorSnackBar(context: context, message: result.error!);
           }
         },
       );

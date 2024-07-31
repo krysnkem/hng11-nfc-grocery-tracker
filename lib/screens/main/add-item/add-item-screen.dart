@@ -9,8 +9,8 @@ import 'package:grocey_tag/core/enums/enum.dart';
 import 'package:grocey_tag/core/models/item.dart';
 import 'package:grocey_tag/providers/inventory_provider/inventory_provider.dart';
 import 'package:grocey_tag/screens/main/home/widgets/confirm_should_over_write.dart';
+import 'package:grocey_tag/screens/main/home/widgets/show_status_snack_bar.dart';
 import 'package:grocey_tag/utils/date-util.dart';
-import 'package:grocey_tag/utils/snack_message.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
 import 'package:grocey_tag/widgets/drop_down_menu.dart';
@@ -18,10 +18,13 @@ import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
 import 'package:grocey_tag/widgets/scan_tag/show_write_button_sheet.dart';
 import 'package:grocey_tag/widgets/text-field-widget.dart';
 
+import '../../../utils/custom_input_formatter.dart';
 import '../../../widgets/app_button.dart';
 
 class AddItemScreen extends ConsumerStatefulWidget {
-  const AddItemScreen({super.key});
+  const AddItemScreen({super.key, this.overWriteConfirmed = false});
+
+  final bool overWriteConfirmed;
 
   @override
   ConsumerState<AddItemScreen> createState() => _AddItemScreenState();
@@ -85,21 +88,16 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
 
   submit() async {
     if (!allFieldsComplete) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: toast('Fill all fields', success: false),
-          backgroundColor: Colors.transparent,
-        ),
-      );
+      showErrorSnackBar(context: context, message: 'Fill all fields');
       return;
     }
     final writeData = Item(
-      name: nameController.text.trim(),
+      name: nameController.text.trim().trimLeft(),
       quantity: int.parse(quantityController.text.trim()),
       metric: selectedMetric!,
       purchaseDate: purchaseDate,
       expiryDate: expiryDate,
-      additionalNote: additionalNoteController.text.trim(),
+      additionalNote: additionalNoteController.text.trim().trimLeft(),
       threshold: int.parse(warningQuantityController.text.trim()),
     );
 
@@ -109,29 +107,36 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
         .where((item) =>
             item.name.toLowerCase() == nameController.text.trim().toLowerCase())
         .isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: toast('Item is already in inventory', success: false),
-          backgroundColor: Colors.transparent,
-        ),
+      showErrorSnackBar(
+        context: context,
+        message: 'Item is already in inventory',
       );
       return;
     }
 
+    if (widget.overWriteConfirmed) {
+      await writeToTag(writeData);
+    } else {
+      await checkDataBeforeWrite(writeData);
+    }
+  }
+
+  Future<void> checkDataBeforeWrite(Item writeData) async {
     await showReadButtonSheet(context: context).then(
       (result) async {
         log('Result: ${result.status}');
         if (result.status == NfcReadStatus.success) {
           final item = result.data as Item;
-          final shouldOverwrite = await confirmShouldOverWrite(context,
-              title: 'This tag is for ${item.name}');
+          final shouldOverwrite = await confirmShouldOverWrite(
+            context,
+            title: 'This tag is for ${item.name}',
+          );
 
           if (shouldOverwrite) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Removing Item from inventory'),
-                  backgroundColor: Colors.transparent,
                 ),
               );
             }
@@ -141,7 +146,6 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Overwrite tag'),
-                  backgroundColor: Colors.transparent,
                 ),
               );
             }
@@ -156,7 +160,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
         }
 
         if (result.error != null) {
-          toast(result.error!);
+          showErrorSnackBar(context: context, message: result.error!);
         }
       },
     );
@@ -169,12 +173,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
     ).then(
       (result) {
         if (result.status == NfcWriteStatus.success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: toast('Item saved'),
-              backgroundColor: Colors.transparent,
-            ),
-          );
+          showStatusSnackBar(context: context, message: 'Item saved');
           ref.read(inventoryProvider.notifier).register(writeData);
           Navigator.pop(context);
         }
@@ -182,12 +181,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
         log('Result: ${result.status}');
 
         if (result.error != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: toast(result.error!, success: false),
-              backgroundColor: Colors.transparent,
-            ),
-          );
+          showErrorSnackBar(context: context, message: result.error!);
         }
       },
     );
@@ -221,6 +215,9 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                       controller: nameController,
                       hint: "Enter Item Name",
                       onChanged: onChange,
+                      inputFormatters: [
+                        CustomInputFormatter(),
+                      ],
                     ),
                     10.sp.sbH,
                     AppTextField(
@@ -240,7 +237,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                     ),
                     10.sp.sbH,
                     AppTextField(
-                      hintText: "Quantity for alert",
+                      hintText: "Add To Shopping List At",
                       controller: warningQuantityController,
                       suffixIcon: DropDownMenu(
                         onSelect: onChangeData,
@@ -250,18 +247,9 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                       ),
                       contentPadding: 16.sp.padH,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      hint: "Enter Quantity were warning will be sent",
+                      hint: "",
                       keyboardType: TextInputType.number,
                       onChanged: onChange,
-                    ),
-                    10.sp.sbH,
-                    AppText(
-                      "What amount should this item be automatically added to the Shop List",
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(fontSize: 12.sp),
-                      align: TextAlign.start,
                     ),
                     16.sp.sbH,
                     AppTextField(
@@ -293,6 +281,9 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                       onChanged: onChange,
                       hint: "Add Additional notes",
                       maxLength: 20,
+                      inputFormatters: [
+                        CustomInputFormatter(),
+                      ],
                     ),
                     10.sp.sbH,
                   ],
