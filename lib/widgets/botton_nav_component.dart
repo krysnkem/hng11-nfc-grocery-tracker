@@ -10,20 +10,15 @@ import '../core/constants/pallete.dart';
 class AppBottomNavigationBar extends StatelessWidget {
   final Function(int) onItemSelected;
   final int selectedIndex;
-  const AppBottomNavigationBar({super.key, required this.onItemSelected, required this.selectedIndex});
+  const AppBottomNavigationBar(
+      {super.key, required this.onItemSelected, required this.selectedIndex});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        boxShadow: [
-          BoxShadow(
-              color: Colors.grey.shade300,
-              blurRadius: 6
-          )
-        ]
-      ),
+          color: Theme.of(context).cardColor,
+          boxShadow: [BoxShadow(color: Colors.grey.shade300, blurRadius: 6)]),
       margin: const EdgeInsets.all(0),
       child: SafeArea(
         top: false,
@@ -55,31 +50,21 @@ class AppBottomNavigationBar extends StatelessWidget {
                   index: 2,
                   onTap: onItemSelected,
                 ),
-                _NavigationBarItem(
-                  icon: AppImages.settings,
-                  label: 'Settings',
-                  isSelected: (selectedIndex == 3),
-                  index: 3,
-                  onTap: onItemSelected,
-                ),
-              ]
-          ),
+              ]),
         ),
       ),
     );
   }
 }
 
-
 class _NavigationBarItem extends StatelessWidget {
-  _NavigationBarItem({
-    Key? key,
-    required this.label,
-    required this.icon,
-    required this.index,
-    this.isSelected = false,
-    required this.onTap
-  }) : super(key: key);
+  _NavigationBarItem(
+      {super.key,
+      required this.label,
+      required this.icon,
+      required this.index,
+      this.isSelected = false,
+      required this.onTap});
 
   final String label;
   final String icon;
@@ -89,11 +74,10 @@ class _NavigationBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Expanded(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: (){
+        onTap: () {
           onTap(index);
         },
         child: SizedBox(
@@ -108,13 +92,14 @@ class _NavigationBarItem extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     10.sp.sbH,
-                    SvgPicture.asset(icon, height: 24, color: isSelected? primaryColor : blackColor, width: 24.sp),
+                    SvgPicture.asset(icon,
+                        height: 24,
+                        color: isSelected ? primaryColor : blackColor,
+                        width: 24.sp),
                     5.sp.sbH,
-                    AppText(
-                      label,
-                      color: isSelected? primaryColor : blackColor,
-                      align: TextAlign.center
-                    )
+                    AppText(label,
+                        color: isSelected ? primaryColor : blackColor,
+                        align: TextAlign.center)
                   ],
                 ),
               ),
