@@ -279,6 +279,7 @@ class _InventoryState extends ConsumerState<Inventory> {
           }
 
           if (result.status == NfcReadStatus.empty) {
+            navigationService.navigateToWidget(const AddItemScreen());
             return;
           }
 
