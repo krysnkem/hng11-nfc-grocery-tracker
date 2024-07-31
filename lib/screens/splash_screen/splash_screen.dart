@@ -63,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen>
             ),
             16.sp.sbH,
             AppText(
-              "GroceryTag",
+              "GroceyTag",
               size: 28.sp,
               weight: FontWeight.w800,
             )

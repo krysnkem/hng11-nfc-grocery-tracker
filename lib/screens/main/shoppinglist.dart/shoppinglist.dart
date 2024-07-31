@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:grocey_tag/core/constants/app_images.dart';
 import 'package:grocey_tag/core/constants/constants.dart';
 import 'package:grocey_tag/core/enums/enum.dart';
 import 'package:grocey_tag/core/models/item.dart';
@@ -54,19 +56,8 @@ class _ShoppingListState extends ConsumerState<ShoppingList> {
                           40.w.sbW,
                           AppText("(${item.quantity})"),
                           40.w.sbW,
-                          if (item.isExpired) ...[
-                            Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.orange),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: const AppText(
-                                'Expired',
-                                style: TextStyle(
-                                    color: Colors.orange, fontSize: 11),
-                              ),
-                            ),
+                          if (item.expiringSoon || item.isExpired) ...[
+                            SvgPicture.asset(AppImages.warning)
                           ],
                         ],
                       ),

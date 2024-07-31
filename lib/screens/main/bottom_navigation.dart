@@ -63,7 +63,7 @@ class _BottomNavigationState extends ConsumerState<BottomNavigation> {
   Widget build(BuildContext context) {
     return PopScope(
       onPopInvoked: (val) {
-        popUp("Close GroceryTag", pop);
+        popUp("Close GroceyTag", pop);
       },
       canPop: false,
       child: FutureBuilder(

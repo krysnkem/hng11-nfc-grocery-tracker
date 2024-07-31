@@ -25,12 +25,12 @@ class ActivityStateNotifier extends StateNotifier<ActivityState> {
   }
 
   Future<void> registerActivity(Activity activity) async {
-    await StorageService.registerActivity(activity);
     final activities = List<Activity>.from(state.activities);
     activities.add(activity);
     activities.sort((a, b) => b.date.compareTo(a.date));
 
     state = ActivityState.loaded(activities);
+    await StorageService.registerActivity(activity);
   }
 
   void registerAdd(Item item) {
