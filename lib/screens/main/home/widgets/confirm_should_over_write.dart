@@ -7,7 +7,7 @@ Future<bool> confirmShouldOverWrite(BuildContext context, {String? title}) {
   return showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text(title ?? 'Your tag is not emtpy'),
+      title: Text(title ?? 'Your tag is not empty'),
       backgroundColor: Colors.white,
       content: Column(
         mainAxisSize: MainAxisSize.min,
