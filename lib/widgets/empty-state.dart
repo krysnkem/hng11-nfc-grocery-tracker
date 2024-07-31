@@ -8,8 +8,9 @@ import 'apptext.dart';
 class EmptyListState extends StatelessWidget {
   final String text;
   final String lottieFile;
+  final double? size;
   const EmptyListState(
-      {super.key, required this.text, required this.lottieFile});
+      {super.key, required this.text, required this.lottieFile, this.size});
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +22,8 @@ class EmptyListState extends StatelessWidget {
           Lottie.asset(
             lottieFile,
             alignment: Alignment.center,
-            height: 300.sp,
-            width: 300.sp,
+            height: size ?? 300.sp,
+            width: size ?? 300.sp,
           ),
           20.sp.sbH,
           AppText(

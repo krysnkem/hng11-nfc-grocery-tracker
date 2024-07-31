@@ -147,39 +147,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  List<Map<String, dynamic>> historyItem = [
-    {
-      "title": "Mr Beast Choco",
-      "date": "16 July at 09:32",
-      "measureUnit": "KG",
-      "quantity": 5,
-    },
-    {
-      "title": "Melon Pods",
-      "date": "16 July at 09:32",
-      "measureUnit": "Cups",
-      "quantity": 10,
-    },
-    {
-      "title": "Green Peas",
-      "date": "16 July at 09:32",
-      "measureUnit": "KG",
-      "quantity": 2,
-    },
-    {
-      "title": "Pasta",
-      "date": "16 July at 09:32",
-      "measureUnit": "Packs",
-      "quantity": 2,
-    },
-    {
-      "title": "Indomie",
-      "date": "16 July at 09:32",
-      "measureUnit": "Carton",
-      "quantity": 1,
-    },
-  ];
-
   bool show = true;
 
   @override
@@ -272,9 +239,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Builder(builder: (context) {
                   final activities = ref.watch(activityProvider).activities;
                   return activities.isEmpty
-                      ? const EmptyListState(
+                      ? EmptyListState(
                           text: "No recent activity",
-                          lottieFile: AppImages.emptyInventory)
+                          lottieFile: AppImages.emptyInventory,
+                          size: 100.sp,
+                        )
                       : ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
