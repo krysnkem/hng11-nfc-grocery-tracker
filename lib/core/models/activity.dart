@@ -1,4 +1,5 @@
 import 'package:grocey_tag/core/enums/enum.dart';
+
 class Activity {
   const Activity({
     required this.itemName,
