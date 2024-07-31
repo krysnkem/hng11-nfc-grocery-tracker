@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             navigatorKey: NavigationService().navigatorKey,
             scaffoldMessengerKey: NavigationService().snackBarKey,
-            title: "GroceryTag",
+            title: "GroceyTag",
             theme: Styles.themeData(),
             onGenerateRoute: Routers.generateRoute,
             home: const SplashScreen(),

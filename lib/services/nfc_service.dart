@@ -43,7 +43,7 @@ class NFCService {
 
           try {
             Map<String, dynamic> jsonData = jsonDecode(tempRecord);
-            if (jsonData.containsKey('grocery_tag')) {
+            if (jsonData.containsKey(APPKEY)) {
               Item item = Item.fromJson(jsonData);
               completer.complete(
                   NFCReadResult(status: NfcReadStatus.success, data: item));
