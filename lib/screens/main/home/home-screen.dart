@@ -117,20 +117,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // updateTag(bool update) {
-  //   appBottomSheet(
-  //       ScanTagWidget(
-  //         onTap: !update
-  //             ? readTag
-  //             : () => _writeToNfcTag({
-  //                   'itemName': "Start",
-  //                   'itemQuantity': 9,
-  //                   'price': 300,
-  //                 }),
-  //       ),
-  //       height: 462.sp);
-  // }
-
   showOption() async {
     () {
       appBottomSheet(Column(
@@ -228,39 +214,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  List<Map<String, dynamic>> historyItem = [
-    {
-      "title": "Mr Beast Choco",
-      "date": "16 July at 09:32",
-      "measureUnit": "KG",
-      "quantity": 5,
-    },
-    {
-      "title": "Melon Pods",
-      "date": "16 July at 09:32",
-      "measureUnit": "Cups",
-      "quantity": 10,
-    },
-    {
-      "title": "Green Peas",
-      "date": "16 July at 09:32",
-      "measureUnit": "KG",
-      "quantity": 2,
-    },
-    {
-      "title": "Pasta",
-      "date": "16 July at 09:32",
-      "measureUnit": "Packs",
-      "quantity": 2,
-    },
-    {
-      "title": "Indomie",
-      "date": "16 July at 09:32",
-      "measureUnit": "Carton",
-      "quantity": 1,
-    },
-  ];
-
   bool show = true;
 
   @override
@@ -289,15 +242,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       count: state.items.length,
                       svgImage: AppImages.inventory,
                       title: "Total items",
-                      onTap: ()=> widget.onNavigationItem(1),
+                      onTap: () => widget.onNavigationItem(1),
                     ),
                     16.sp.sbW,
                     DashBoardCard(
-                      count: notifier.totalRunningLowItemsCount,
-                      svgImage: AppImages.trend,
-                      title: "Running low",
-                      onTap: ()=> widget.onNavigationItem(2)
-                    ),
+                        count: notifier.totalRunningLowItemsCount,
+                        svgImage: AppImages.trend,
+                        title: "Running low",
+                        onTap: () => widget.onNavigationItem(2)),
                   ],
                 ),
                 16.sp.sbH,
@@ -353,19 +305,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 16.sp.sbH,
                 Builder(builder: (context) {
                   final activities = ref.watch(activityProvider).activities;
-                  return activities.isEmpty? const EmptyListState(
-                      text: "No recent activity",
-                      lottieFile: AppImages.emptyInventory
-                  ):
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: activities.length,
-                      itemBuilder: (context, index) {
-                        return ActivityHistoryItem(
-                          activity: activities[index],
-                        );
-                      });
+                  return activities.isEmpty
+                      ? EmptyListState(
+                          text: "No recent activity",
+                          lottieFile: AppImages.emptyInventory,
+                          size: 100.sp,
+                        )
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: activities.length,
+                          itemBuilder: (context, index) {
+                            return ActivityHistoryItem(
+                              activity: activities[index],
+                            );
+                          });
                 }),
                 30.sp.sbH
               ],
