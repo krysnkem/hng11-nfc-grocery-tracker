@@ -227,7 +227,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                       suffixIcon: DropDownMenu(
                         onSelect: onChangeData,
                         data: data,
-                        hint: 'e.g KG',
+                        hint: 'Select',
                         selectedOption: selectedMetric,
                       ),
                       contentPadding: 16.sp.padH,
@@ -241,7 +241,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                       controller: warningQuantityController,
                       suffixIcon: DropDownMenu(
                         onSelect: onChangeData,
-                        hint: 'e.g KG',
+                        hint: 'Select',
                         data: data,
                         selectedOption: selectedMetric,
                       ),
