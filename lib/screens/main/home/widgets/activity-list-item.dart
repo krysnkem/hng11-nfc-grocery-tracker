@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:grocey_tag/core/enums/enum.dart';
+import 'package:grocey_tag/core/models/activity.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../widgets/apptext.dart';
 
 class ActivityHistoryItem extends StatelessWidget {
-  final String title;
-  final String date;
-  final String? measureUnit;
-  final num quantity;
+  final Activity activity;
   const ActivityHistoryItem({
-    super.key, required this.title, required this.date, this.measureUnit, required this.quantity,
+    super.key,
+    required this.activity,
   });
 
   @override
@@ -22,25 +23,23 @@ class ActivityHistoryItem extends StatelessWidget {
         children: [
           Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppText(
-                    title,
-                    size: 16.sp,
-                    weight: FontWeight.w500,
-                  ),
-                  2.sp.sbH,
-                  AppText(
-                    date,
-                    size: 12.sp,
-                    color: const Color(0xFF434343),
-                  ),
-
-                ],
-              )
-          ),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppText(
+                activity.itemName,
+                size: 16.sp,
+                weight: FontWeight.w500,
+              ),
+              2.sp.sbH,
+              AppText(
+                DateFormat('d MMMM \'at\' HH:mm').format(activity.date),
+                size: 12.sp,
+                color: const Color(0xFF434343),
+              ),
+            ],
+          )),
           AppText(
-            "${quantity.toString()} ${measureUnit??""}",
+            "${activity.operation == Operation.add ? '+ ' : '- '}${activity.quantity} ${activity.metric.name.toUpperCase()}",
             color: const Color(0xFF434343),
             size: 16.sp,
           )

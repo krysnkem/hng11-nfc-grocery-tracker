@@ -9,6 +9,10 @@ import 'package:grocey_tag/core/constants/constants.dart';
 import 'package:grocey_tag/core/constants/pallete.dart';
 import 'package:grocey_tag/core/enums/enum.dart';
 import 'package:grocey_tag/core/models/item.dart';
+import 'package:grocey_tag/providers/activity_provider/activity_provider.dart';
+import 'package:grocey_tag/providers/inventory_provider/inventory_provider.dart';
+import 'package:grocey_tag/screens/main/add-item/add-item-screen.dart';
+import 'package:grocey_tag/screens/main/edit-item/edit-item-screen.dart';
 import 'package:grocey_tag/screens/main/home/widgets/activity-list-item.dart';
 import 'package:grocey_tag/utils/snack_message.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
@@ -16,9 +20,10 @@ import 'package:grocey_tag/widgets/app-card.dart';
 import 'package:grocey_tag/widgets/app_button.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
 import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
-import 'package:grocey_tag/widgets/scan_tag/show_write_button_sheet.dart';
 
 import '../../../utils/app-bottom-sheet.dart';
+import '../../../widgets/empty-state.dart';
+import 'widgets/confirm_should_over_write.dart';
 import 'widgets/dashboard_card.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -128,114 +133,100 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // }
 
   showOption() async {
-    appBottomSheet(Column(
-      children: [
-        AppButton(
-          text: "Read",
-          isOutline: true,
-          borderColor: primaryColor,
-          textColor: primaryColor,
-          onTap: () async {
-            Navigator.of(context).pop();
-            showReadButtonSheet(context: context).then(
-              (result) {
-                log('Result: ${result.status}');
-                if (result.status == NfcReadStatus.success) {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: const Text('What we found'),
-                        content: Text('${(result.data as Item).toJson()}'),
-                      );
-                    },
-                  );
-                }
-
-                if (result.error != null) {
-                  toast(result.error!);
-                }
-
-                if (result.status == NfcReadStatus.notForApp) {
-                  toast('read data is not for app');
-                }
-              },
-            );
-          },
-        ),
-        10.sp.sbH,
-        AppButton(
-          text: "Write",
-          isOutline: true,
-          borderColor: primaryColor,
-          textColor: primaryColor,
-          onTap: () async {
-            Navigator.of(context).pop();
-            _showWriteDialog().then(
-              (writeData) async {
-                if (writeData != null) {
-                  log('${writeData.toJson()}');
-                  final result = await showWriteButtonSheet(
-                    context: context,
-                    item: writeData,
-                  );
-
-                  toast('Data Written!');
-
+    () {
+      appBottomSheet(Column(
+        children: [
+          AppButton(
+            text: "Read",
+            isOutline: true,
+            borderColor: primaryColor,
+            textColor: primaryColor,
+            onTap: () async {
+              Navigator.of(context).pop();
+              showReadButtonSheet(context: context).then(
+                (result) {
                   log('Result: ${result.status}');
+                  if (result.status == NfcReadStatus.success) {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('What we found'),
+                          content: Text('${(result.data as Item).toJson()}'),
+                        );
+                      },
+                    );
+                  }
 
                   if (result.error != null) {
                     toast(result.error!);
                   }
-                }
-              },
-            );
-          },
-        ),
-        10.sp.sbH,
-        AppButton(
-          text: "Cancel",
-          onTap: navigationService.goBack,
-          backGroundColor: Colors.red,
-          borderColor: Colors.red,
-        ),
-        16.sp.sbH
-      ],
-    ));
-  }
 
-  Future<void> _writeToNfcTag(Map<String, dynamic> data) async {
-    // FOR TESTING
-    // navigationService.navigateToWidget(const AddItemScreen());
+                  if (result.status == NfcReadStatus.notForApp) {
+                    toast('read data is not for app');
+                  }
+                },
+              );
+            },
+          ),
+          10.sp.sbH,
+          AppButton(
+            text: "Write",
+            isOutline: true,
+            borderColor: primaryColor,
+            textColor: primaryColor,
+            onTap: () async {
+              Navigator.of(context).pop();
+              _showWriteDialog().then(
+                (writeData) async {
+                  if (writeData != null) {
+                    log('${writeData.toJson()}');
+                  }
+                },
+              );
+            },
+          ),
+          10.sp.sbH,
+          AppButton(
+            text: "Cancel",
+            onTap: navigationService.goBack,
+            backGroundColor: Colors.red,
+            borderColor: Colors.red,
+          ),
+          16.sp.sbH
+        ],
+      ));
+    };
 
-    // USE THIS LATER UNCOMMENT THE BELOW
+    showReadButtonSheet(context: context).then(
+      (result) async {
+        log('Result: ${result.status}');
+        if (result.status == NfcReadStatus.success) {
+          final item = result.data as Item;
+          navigationService.navigateToWidget(EditItemScreen(item: item));
+          return;
+        }
 
-    // if(checkNfcAvailable== true){
-    //   _nfcService.readNfcTag((data) {
-    //     navigationService.navigateToWidget(const EditItemScreen());
-    //   }, (error) {
-    //     showCustomToast(error);
-    //   });
-    //   return;
-    // }
-    // showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
-  }
+        if (result.status == NfcReadStatus.empty) {
+          navigationService.navigateToWidget(const AddItemScreen());
+          return;
+        }
 
-  readTag() async {
-    // FOR TESTING
-    // navigationService.navigateToWidget(const EditItemScreen());
+        if (result.status == NfcReadStatus.notForApp) {
+          toast('Data is not for this app');
+          final shouldOverwrite = await confirmShouldOverWrite(context);
 
-    // USE THIS LATER UNCOMMENT THE BELOW
+          if (shouldOverwrite) {
+            navigationService.navigateToWidget(const AddItemScreen());
+          }
+          return;
+        }
 
-    // if(checkNfcAvailable== true){
-    //   _nfcService.readNfcTag((data) {
-    //   navigationService.navigateToWidget(const EditItemScreen());
-    //   }, (error) {
-    //       showCustomToast(error);
-    //   });
-    //   return;
-    // }
-    // showCustomToast("Your phone: \"${await getDeviceName()}\" doesn't have the facility to use NFC");
+        if (result.error != null) {
+          toast(result.error!);
+        }
+      },
+    );
   }
 
   List<Map<String, dynamic>> historyItem = [
@@ -275,6 +266,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(inventoryProvider);
+    final notifier = ref.read(inventoryProvider.notifier);
     return Scaffold(
       appBar: show
           ? AppBar(
@@ -293,24 +286,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 16.sp.sbH,
                 Row(
                   children: [
-                    const DashBoardCard(
-                      count: 15,
+                    DashBoardCard(
+                      count: state.items.length,
                       svgImage: AppImages.inventory,
                       title: "Total items",
+                      onTap: ()=> widget.onNavigationItem(1),
                     ),
                     16.sp.sbW,
-                    const DashBoardCard(
-                      count: 3,
+                    DashBoardCard(
+                      count: notifier.totalRunningLowItemsCount,
                       svgImage: AppImages.trend,
                       title: "Running low",
+                      onTap: ()=> widget.onNavigationItem(2)
                     ),
                   ],
                 ),
                 16.sp.sbH,
                 Row(
                   children: [
-                    const DashBoardCard(
-                      count: 6,
+                    DashBoardCard(
+                      count: notifier.totalExpiringItemsCount,
                       svgImage: AppImages.warning,
                       title: "Expiring soon",
                     ),
@@ -370,17 +365,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
                 16.sp.sbH,
-                ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: historyItem.length,
-                    itemBuilder: (context, index) {
-                      return ActivityHistoryItem(
-                          title: historyItem[index]["title"],
-                          date: historyItem[index]["date"],
-                          quantity: historyItem[index]["quantity"],
-                          measureUnit: historyItem[index]["measureUnit"]);
-                    }),
+                Builder(builder: (context) {
+                  final activities = ref.watch(activityProvider).activities;
+                  return activities.isEmpty? const EmptyListState(
+                      text: "No recent activity",
+                      lottieFile: AppImages.emptyInventory
+                  ):
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: activities.length,
+                      itemBuilder: (context, index) {
+                        return ActivityHistoryItem(
+                          activity: activities[index],
+                        );
+                      });
+                }),
                 30.sp.sbH
               ],
             )

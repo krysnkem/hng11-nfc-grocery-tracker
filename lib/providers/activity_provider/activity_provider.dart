@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grocey_tag/core/enums/enum.dart';
 import 'package:grocey_tag/core/models/activity.dart';
 import 'package:grocey_tag/core/models/item.dart';
-import 'package:grocey_tag/services/storage.service.dart';
+import 'package:grocey_tag/services/storage/storage.service.dart';
 
 import 'activity_state.dart';
 
@@ -16,6 +16,8 @@ class ActivityStateNotifier extends StateNotifier<ActivityState> {
       state = const ActivityState.loading();
 
       final activities = await StorageService.readAllActivity();
+      activities.sort((a, b) => b.date.compareTo(a.date));
+
       state = ActivityState.loaded(activities);
     } catch (e) {
       state = state.setError(message: e.toString());
@@ -26,6 +28,9 @@ class ActivityStateNotifier extends StateNotifier<ActivityState> {
     await StorageService.registerActivity(activity);
     final activities = List<Activity>.from(state.activities);
     activities.add(activity);
+    activities.sort((a, b) => b.date.compareTo(a.date));
+
+    state = ActivityState.loaded(activities);
   }
 
   void registerAdd(Item item) {
@@ -33,6 +38,7 @@ class ActivityStateNotifier extends StateNotifier<ActivityState> {
       itemName: item.name,
       quantity: item.quantity,
       operation: Operation.add,
+      metric: item.metric,
     ));
   }
 
@@ -42,6 +48,7 @@ class ActivityStateNotifier extends StateNotifier<ActivityState> {
       itemName: oldItem.name,
       quantity: oldItem.quantity - newItem.quantity,
       operation: Operation.subtract,
+      metric: oldItem.metric,
     ));
   }
 }

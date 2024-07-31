@@ -1,5 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:grocey_tag/core/enums/enum.dart';
+import 'package:grocey_tag/services/storage/app_db.dart';
 import 'package:grocey_tag/core/models/activity.dart';
 import 'package:grocey_tag/core/models/item.dart';
 
@@ -40,33 +40,11 @@ class FlutterSecureStorageService {
 // write an activity
 
 class StorageService {
-  static const _operationDuration = Duration(milliseconds: 500);
-
   static Future<List<Item>> readAllItems() async {
     try {
-      await Future.delayed(_operationDuration);
-      final itemNames = [
-        'Milk',
-        'Sausage',
-        'Bread',
-        'Fruits',
-        'Eggs',
-        'Mayonnaise',
-        'Pepper',
-      ];
-
-      return itemNames
-          .map(
-            (eachItem) => Item(
-                name: eachItem,
-                quantity: 10,
-                metric: Metric.litre,
-                purchaseDate: DateTime.now(),
-                expiryDate: DateTime(2024),
-                additionalNote: 'This is $eachItem',
-                threshold: 7),
-          )
-          .toList();
+      final db = await AppDb.getDatabase();
+      final rawTableData = await db.query(AppDb.itemsTableName);
+      return rawTableData.map((itemMap) => Item.fromJson(itemMap)).toList();
     } catch (e) {
       rethrow;
     }
@@ -74,7 +52,12 @@ class StorageService {
 
   static Future<void> registerItem(Item item) async {
     try {
-      await Future.delayed(_operationDuration);
+      final db = await AppDb.getDatabase();
+      await db.insert(
+        AppDb.itemsTableName,
+        item.toJson(),
+        conflictAlgorithm: AppDb.conflictAlgorithm,
+      );
     } catch (e) {
       rethrow;
     }
@@ -82,33 +65,48 @@ class StorageService {
 
   static Future<void> delete(Item item) async {
     try {
-      await Future.delayed(_operationDuration);
+      final db = await AppDb.getDatabase();
+      await db.delete(AppDb.itemsTableName,
+          where: 'name = ?', whereArgs: [item.name]);
     } catch (e) {
       rethrow;
     }
   }
 
   static Future<void> update(Item item) async {
-    await Future.delayed(_operationDuration);
+    try {
+      final db = await AppDb.getDatabase();
+      await db.update(AppDb.itemsTableName, item.toJson(),
+          where: 'name = ?', whereArgs: [item.name]);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   // we are done with the operations for items
 
   static Future<List<Activity>> readAllActivity() async {
-    await Future.delayed(_operationDuration);
-    return [
-      Activity(
-        itemName: 'Mr Beast Choco',
-        operation: Operation.add,
-        quantity: 5,
-        date: DateTime.now().subtract(
-          const Duration(days: 2),
-        ),
-      )
-    ];
+    try {
+      final db = await AppDb.getDatabase();
+      final rawTableData = await db.query(AppDb.activitiesTableName);
+      return rawTableData
+          .map((activityMap) => Activity.fromJson(activityMap))
+          .toList();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   static Future<void> registerActivity(Activity activity) async {
-    await Future.delayed(_operationDuration);
+    try {
+      final db = await AppDb.getDatabase();
+      await db.insert(
+        AppDb.activitiesTableName,
+        activity.toJson(),
+        conflictAlgorithm: AppDb.conflictAlgorithm,
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 }

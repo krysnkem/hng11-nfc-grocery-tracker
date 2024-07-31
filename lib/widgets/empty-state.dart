@@ -13,28 +13,26 @@ class EmptyListState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Lottie.asset(
-              lottieFile,
-              alignment: Alignment.center,
-              height: 300.sp,
-              width: 300.sp,
-            ),
-            20.sp.sbH,
-            AppText(
-              text,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(fontSize: 17.sp),
-            )
-          ],
-        ),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Lottie.asset(
+            lottieFile,
+            alignment: Alignment.center,
+            height: 300.sp,
+            width: 300.sp,
+          ),
+          20.sp.sbH,
+          AppText(
+            text,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(fontSize: 17.sp),
+          )
+        ],
       ),
     );
   }
