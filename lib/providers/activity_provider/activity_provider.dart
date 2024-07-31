@@ -16,6 +16,8 @@ class ActivityStateNotifier extends StateNotifier<ActivityState> {
       state = const ActivityState.loading();
 
       final activities = await StorageService.readAllActivity();
+      activities.sort((a, b) => b.date.compareTo(a.date));
+
       state = ActivityState.loaded(activities);
     } catch (e) {
       state = state.setError(message: e.toString());
@@ -26,24 +28,27 @@ class ActivityStateNotifier extends StateNotifier<ActivityState> {
     await StorageService.registerActivity(activity);
     final activities = List<Activity>.from(state.activities);
     activities.add(activity);
+    activities.sort((a, b) => b.date.compareTo(a.date));
+
+    state = ActivityState.loaded(activities);
   }
 
   void registerAdd(Item item) {
     registerActivity(Activity.generate(
       itemName: item.name,
-      itemMetric: item.metric,
       quantity: item.quantity,
       operation: Operation.add,
+      metric: item.metric,
     ));
   }
 
   void registerSubract({required Item oldItem, required Item newItem}) {
     assert(oldItem.name == newItem.name);
     registerActivity(Activity.generate(
-      itemMetric: oldItem.metric,
       itemName: oldItem.name,
       quantity: oldItem.quantity - newItem.quantity,
       operation: Operation.subtract,
+      metric: oldItem.metric,
     ));
   }
 }

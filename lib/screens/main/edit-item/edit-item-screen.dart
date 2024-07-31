@@ -1,26 +1,33 @@
+import 'dart:developer' as dev;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grocey_tag/core/constants/constants.dart';
 import 'package:grocey_tag/core/constants/pallete.dart';
+import 'package:grocey_tag/core/enums/enum.dart';
+import 'package:grocey_tag/core/models/item.dart';
+import 'package:grocey_tag/providers/inventory_provider/inventory_provider.dart';
 import 'package:grocey_tag/utils/date-util.dart';
+import 'package:grocey_tag/utils/snack_message.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
+import 'package:grocey_tag/widgets/scan_tag/show_write_button_sheet.dart';
 import 'package:grocey_tag/widgets/text-field-widget.dart';
 
-import '../../../utils/app-bottom-sheet.dart';
 import '../../../widgets/app_button.dart';
-import '../../../widgets/scan-tage-widget.dart';
+import '../../../widgets/drop_down_menu.dart';
 
-class EditItemScreen extends StatefulWidget {
-  final Map<String, dynamic> data;
-  const EditItemScreen({super.key, required this.data});
+class EditItemScreen extends ConsumerStatefulWidget {
+  final Item item;
+  const EditItemScreen({super.key, required this.item});
 
   @override
-  State<EditItemScreen> createState() => _EditItemScreenState();
+  ConsumerState<EditItemScreen> createState() => _EditItemScreenState();
 }
 
-class _EditItemScreenState extends State<EditItemScreen> {
+class _EditItemScreenState extends ConsumerState<EditItemScreen> {
   TextEditingController nameController = TextEditingController();
   TextEditingController quantityController = TextEditingController();
   TextEditingController warningQuantityController = TextEditingController();
@@ -30,33 +37,24 @@ class _EditItemScreenState extends State<EditItemScreen> {
 
   @override
   void initState() {
-    nameController = TextEditingController(text: widget.data["name"]);
-    quantityController = TextEditingController(text: widget.data["quantity"]);
-    warningQuantityController = TextEditingController(text: widget.data["alertQuantity"]);
-    additionalNoteController = TextEditingController(text: widget.data["additionalNote"]);
-    expires = widget.data["expiryDate"];
-    purchased = widget.data["purchaseDate"];
-    expiryDate =  widget.data["expiryDate"]?? DateTime.now();
-    purchaseDate =  widget.data["purchaseDate"]?? DateTime.now();
-    purchaseDateController = TextEditingController(text: purchased != null? DateUtil.toDates(purchaseDate): null);
-    expiryDateController =TextEditingController(text: expires != null? DateUtil.toDates(expiryDate): null);
-    onChangeData(widget.data["measureUnit"]);
+    nameController = TextEditingController(text: widget.item.name);
+    quantityController =
+        TextEditingController(text: widget.item.quantity.toString());
+    warningQuantityController =
+        TextEditingController(text: widget.item.threshold.toString());
+    additionalNoteController =
+        TextEditingController(text: widget.item.additionalNote);
+    expires = widget.item.expiryDate;
+    purchased = widget.item.purchaseDate;
+    expiryDate = widget.item.expiryDate;
+    purchaseDate = widget.item.purchaseDate;
+    purchaseDateController = TextEditingController(
+        text: purchased != null ? DateUtil.toDates(purchaseDate) : null);
+    expiryDateController = TextEditingController(
+        text: expires != null ? DateUtil.toDates(expiryDate) : null);
+    onChangeData(widget.item.metric);
     super.initState();
   }
-
-  // submit(){
-  //   appBottomSheet(ScanTagWidget(onTap:()=> _writeToNfcTag(
-  //       {
-  //         'name': nameController.text.trim(),
-  //         'quantity': quantityController.text.trim(),
-  //         'alertQuantity': warningQuantityController.text.trim(),
-  //         'expiryDate': expires,
-  //         'purchaseDate': purchased,
-  //         'measureUnit': selectedOption,
-  //         'additionalNote': additionalNoteController.text.trim(),
-  //       }
-  //   ),), height: 462.sp);
-  // }
 
   final formKey = GlobalKey<FormState>();
 
@@ -66,11 +64,22 @@ class _EditItemScreenState extends State<EditItemScreen> {
   DateTime expiryDate = DateTime.now();
   DateTime? expires;
 
-  String? selectedOption;
-  List<String> data = ["Litres", "KGs", "Cups", "Packs", "Cartons"];
+  Metric? selectedMetric;
+  List<Metric> data = Metric.values;
 
-  onChangeData(String val) {
-    selectedOption = val;
+  @override
+  dispose() {
+    super.dispose();
+    nameController.dispose();
+    quantityController.dispose();
+    warningQuantityController.dispose();
+    additionalNoteController.dispose();
+    purchaseDateController.dispose();
+    expiryDateController.dispose();
+  }
+
+  onChangeData(Metric val) {
+    selectedMetric = val;
     setState(() {});
   }
 
@@ -78,19 +87,66 @@ class _EditItemScreenState extends State<EditItemScreen> {
     setState(() {});
   }
 
-  submit() {
-    appBottomSheet(
-        ScanTagWidget(
-          onTap: () => _writeToNfcTag({
-            'itemName': nameController.text.trim(),
-            'itemQuantity': quantityController.text.trim(),
-            'price': warningQuantityController.text.trim(),
-          }),
-        ),
-        height: 462.sp);
+  bool get allFieldsComplete {
+    return nameController.text.isNotEmpty &&
+        nameController.text != ' ' &&
+        quantityController.text.isNotEmpty &&
+        quantityController.text != ' ' &&
+        warningQuantityController.text.isNotEmpty &&
+        warningQuantityController.text != ' ' &&
+        additionalNoteController.text.isNotEmpty &&
+        additionalNoteController.text != ' ' &&
+        purchaseDateController.text.isNotEmpty &&
+        purchaseDateController.text != ' ' &&
+        expiryDateController.text.isNotEmpty &&
+        expiryDateController.text != ' ' &&
+        selectedMetric != null;
   }
 
-  Future<void> _writeToNfcTag(Map<String, dynamic> data) async {}
+  submit() async {
+    if (!allFieldsComplete) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: toast('Fill all fields', success: false),
+          backgroundColor: Colors.transparent,
+        ),
+      );
+      return;
+    }
+    final writeData = Item(
+      name: nameController.text.trim(),
+      quantity: int.parse(quantityController.text.trim()),
+      metric: selectedMetric!,
+      purchaseDate: purchaseDate,
+      expiryDate: expiryDate,
+      additionalNote: additionalNoteController.text.trim(),
+      threshold: int.parse(warningQuantityController.text.trim()),
+    );
+
+    await showWriteButtonSheet(
+      context: context,
+      item: writeData,
+    ).then(
+      (result) {
+        if (result.status == NfcWriteStatus.success) {
+          toast('Item saved');
+          ref.read(inventoryProvider.notifier).updateItem(writeData);
+          Navigator.pop(context);
+        }
+
+        dev.log('Result: ${result.status}');
+
+        if (result.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: toast(result.error!, success: false),
+              backgroundColor: Colors.transparent,
+            ),
+          );
+        }
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +167,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
       body: Form(
         key: formKey,
         child: GestureDetector(
-          onTap: ()=> FocusManager.instance.primaryFocus?.unfocus(),
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
           child: Padding(
             padding: 16.sp.padA,
             child: SafeArea(
@@ -120,71 +176,87 @@ class _EditItemScreenState extends State<EditItemScreen> {
               child: Column(
                 children: [
                   Expanded(
-                    child: ListView(
-                      padding: 0.0.padA,
-                      children: [
-                        AppTextField(
-                          hintText:  "Item Name",
-                          controller: nameController,
-                          hint: "Enter Item Name",
-                          onChanged: onChange,
+                      child: ListView(
+                    padding: 0.0.padA,
+                    children: [
+                      AppTextField(
+                        hintText: "Item Name",
+                        controller: nameController,
+                        hint: "Enter Item Name",
+                        onChanged: onChange,
+                      ),
+                      10.sp.sbH,
+                      AppTextField(
+                        hintText: "Quantity",
+                        controller: quantityController,
+                        hint: "Enter Item Quantity",
+                        suffixIcon: DropDownMenu<Metric>(
+                          onSelect: onChangeData,
+                          enabled: false,
+                          hint: 'e.g KG',
+                          data: data,
+                          selectedOption: selectedMetric,
                         ),
-                        10.sp.sbH,
-                        AppTextField(
-                          hintText:  "Quantity",
-                          controller: quantityController,
-                          hint: "Enter Item Quantity",
-                          suffixIcon: DropDownMenu(onSelect: onChangeData, data: data, selectedOption: selectedOption,),
-                          contentPadding: 16.sp.padH,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                          onChanged: onChange,
-                          keyboardType: TextInputType.number,
+                        contentPadding: 16.sp.padH,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        onChanged: onChange,
+                        keyboardType: TextInputType.number,
+                      ),
+                      10.sp.sbH,
+                      AppTextField(
+                        hintText: "Quantity for alert",
+                        controller: warningQuantityController,
+                        suffixIcon: DropDownMenu(
+                          enabled: false,
+                          hint: 'e.g KG',
+                          onSelect: onChangeData,
+                          data: data,
+                          selectedOption: selectedMetric,
                         ),
-                        10.sp.sbH,
-                        AppTextField(
-                          hintText:  "Quantity for alert",
-                          controller: warningQuantityController,
-                          suffixIcon: DropDownMenu(onSelect: onChangeData, data: data, selectedOption: selectedOption,),
-                          contentPadding: 16.sp.padH,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                          hint: "Enter Quantity were warning will be sent",
-                          keyboardType: TextInputType.number,
-                          onChanged: onChange,
+                        contentPadding: 16.sp.padH,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        hint: "Enter Quantity were warning will be sent",
+                        keyboardType: TextInputType.number,
+                        onChanged: onChange,
+                      ),
+                      10.sp.sbH,
+                      AppTextField(
+                        hintText: "Purchase Date",
+                        controller: purchaseDateController,
+                        prefix: Icon(Icons.calendar_month_outlined,
+                            color: blackColor, size: 25.sp),
+                        onTap: pickPurchaseDate,
+                        hint: "Select Purchase Date",
+                        readonly: true,
+                      ),
+                      10.sp.sbH,
+                      AppTextField(
+                        hintText: "Expiry Date",
+                        controller: expiryDateController,
+                        prefix: Icon(
+                          Icons.calendar_month_outlined,
+                          color: blackColor,
+                          size: 25.sp,
                         ),
-                        10.sp.sbH,
-                        AppTextField(
-                          hintText:  "Purchase Date",
-                          controller: purchaseDateController,
-                          prefix: Icon(Icons.calendar_month_outlined, color: blackColor, size: 25.sp),
-                          onTap: pickPurchaseDate,
-                          hint: "Select Purchase Date",
-                          readonly: true,
-                        ),
-                        10.sp.sbH,
-                        AppTextField(
-                          hintText:  "Expiry Date",
-                          controller: expiryDateController,
-                          prefix: Icon(Icons.calendar_month_outlined, color: blackColor, size: 25.sp,),
-                          onTap: pickExpiryDate,
-                          hint: "Select Expiry Date",
-                          readonly: true,
-                        ),
-                        10.sp.sbH,
-                        AppTextField(
-                          hintText:  "Additional Notes",
-                          controller: additionalNoteController,
-                          onChanged: onChange,
-                          hint: "Add Additional notes",
-                        ),
-                        10.sp.sbH,
-
-                      ],
-                    )
-                  ),
+                        onTap: pickExpiryDate,
+                        hint: "Select Expiry Date",
+                        readonly: true,
+                      ),
+                      10.sp.sbH,
+                      AppTextField(
+                        hintText: "Additional Notes",
+                        controller: additionalNoteController,
+                        onChanged: onChange,
+                        hint: "Add Additional notes",
+                        maxLength: 20,
+                      ),
+                      10.sp.sbH,
+                    ],
+                  )),
                   16.sp.sbH,
                   Row(
                     children: [
@@ -199,7 +271,10 @@ class _EditItemScreenState extends State<EditItemScreen> {
                       Expanded(
                         child: AppButton(
                           text: "Save",
-                          onTap: formKey.currentState?.validate() == true && selectedOption != null? submit: null,
+                          onTap: formKey.currentState?.validate() == true &&
+                                  selectedMetric != null
+                              ? submit
+                              : null,
                         ),
                       ),
                     ],
@@ -265,70 +340,5 @@ class _EditItemScreenState extends State<EditItemScreen> {
     expiryDateController =
         TextEditingController(text: DateUtil.toDates(expiryDate));
     setState(() {});
-  }
-}
-
-class DropDownMenu extends StatelessWidget {
-  final String? selectedOption;
-  final Function(String) onSelect;
-  final List<String> data;
-  const DropDownMenu(
-      {super.key,
-      required this.onSelect,
-      required this.data,
-      this.selectedOption});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 48.sp,
-      width: 75.sp,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        border: Border(
-          left: BorderSide(
-            color: Theme.of(context)
-                .disabledColor
-                .withOpacity(0.5), // Border color
-            width: 0.8, // Border width
-          ),
-        ),
-      ),
-      child: PopupMenuButton<String>(
-        onSelected: onSelect,
-        itemBuilder: (BuildContext context) {
-          return data.map((String choice) {
-            return PopupMenuItem<String>(
-              value: choice,
-              child: AppText(
-                choice,
-                weight: FontWeight.w600,
-              ),
-            );
-          }).toList();
-        },
-        child: Row(
-          children: [
-            5.sp.sbW,
-            Expanded(
-              child: FittedBox(
-                child: Padding(
-                  padding: 10.sp.padV,
-                  child: AppText(
-                    selectedOption ?? "Options",
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(fontSize: 12),
-                  ),
-                ),
-              ),
-            ),
-            5.sp.sbW,
-            const Icon(Icons.arrow_drop_down),
-          ],
-        ),
-      ),
-    );
   }
 }
