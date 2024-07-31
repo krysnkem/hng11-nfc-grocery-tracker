@@ -16,7 +16,6 @@ import 'package:grocey_tag/screens/main/edit-item/edit-item-screen.dart';
 import 'package:grocey_tag/screens/main/home/widgets/activity-list-item.dart';
 import 'package:grocey_tag/utils/snack_message.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
-import 'package:grocey_tag/widgets/app-card.dart';
 import 'package:grocey_tag/widgets/app_button.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
 import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
@@ -301,19 +300,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       size: 16.sp,
                       weight: FontWeight.w500,
                     ),
-                    AppCard(
-                      heights: 28.sp,
-                      // onTap: ,
-                      widths: 85.sp,
-                      padding: 0.0.padA,
-                      radius: 24.sp,
-                      backgroundColor: const Color(0xFFDEDEDE),
-                      child: const Center(
-                          child: AppText(
-                        "View all",
-                        weight: FontWeight.w600,
-                      )),
-                    )
                   ],
                 ),
                 16.sp.sbH,

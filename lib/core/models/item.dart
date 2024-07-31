@@ -43,12 +43,15 @@ class Item extends Equatable {
 
   // Utility method to check if item should be added to the shopping list
   bool get shouldAddToShoppingList {
-    return runningLow || isExpired;
+    return runningLow || isExpired || expiringSoon;
   }
 
   bool get runningLow => quantity <= threshold;
 
   bool get isExpired => expiryDate.isBefore(DateTime.now());
+
+  bool get expiringSoon =>
+      expiryDate.isBefore(DateTime.now().add(const Duration(days: 2)));
 
   @override
   String toString() {
