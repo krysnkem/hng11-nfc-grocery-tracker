@@ -8,6 +8,7 @@
 .buildlog/
 .history
 .svn/
+.bash_profile
 migrate_working_dir/
 
 # IntelliJ related
@@ -41,3 +42,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Bola gitignore
+.idx/
