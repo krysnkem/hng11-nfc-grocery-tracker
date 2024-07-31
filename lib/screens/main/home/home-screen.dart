@@ -289,25 +289,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       count: state.items.length,
                       svgImage: AppImages.inventory,
                       title: "Total items",
-                      onTap: ()=> widget.onNavigationItem(1),
+                      onTap: () => widget.onNavigationItem(1),
                     ),
                     16.sp.sbW,
                     DashBoardCard(
-                      count: notifier.totalRunningLowItemsCount,
-                      svgImage: AppImages.trend,
-                      title: "Running low",
-                      onTap: ()=> widget.onNavigationItem(2)
-                    ),
+                        count: notifier.totalRunningLowItemsCount,
+                        svgImage: AppImages.trend,
+                        title: "Running low",
+                        onTap: () => widget.onNavigationItem(2)),
                   ],
                 ),
                 16.sp.sbH,
                 Row(
                   children: [
                     DashBoardCard(
-                      count: notifier.totalExpiringItemsCount,
-                      svgImage: AppImages.warning,
-                      title: "Expiring soon",
-                    ),
+                        count: notifier.totalExpiringItemsCount,
+                        svgImage: AppImages.warning,
+                        title: "Expiring soon",
+                        onTap: () => widget.onNavigationItem(2)),
                     16.sp.sbW,
                     DashNavigateCard(
                       onTap: () => widget.onNavigationItem(1),
@@ -353,19 +352,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 16.sp.sbH,
                 Builder(builder: (context) {
                   final activities = ref.watch(activityProvider).activities;
-                  return activities.isEmpty? const EmptyListState(
-                      text: "No recent activity",
-                      lottieFile: AppImages.emptyInventory
-                  ):
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: activities.length,
-                      itemBuilder: (context, index) {
-                        return ActivityHistoryItem(
-                          activity: activities[index],
-                        );
-                      });
+                  return activities.isEmpty
+                      ? const EmptyListState(
+                          text: "No recent activity",
+                          lottieFile: AppImages.emptyInventory)
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: activities.length,
+                          itemBuilder: (context, index) {
+                            return ActivityHistoryItem(
+                              activity: activities[index],
+                            );
+                          });
                 }),
                 30.sp.sbH
               ],

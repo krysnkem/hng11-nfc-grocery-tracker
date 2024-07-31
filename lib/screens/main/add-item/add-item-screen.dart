@@ -101,6 +101,21 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
       threshold: int.parse(warningQuantityController.text.trim()),
     );
 
+    if (ref
+        .read(inventoryProvider)
+        .items
+        .where((item) =>
+            item.name.toLowerCase() == nameController.text.trim().toLowerCase())
+        .isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: toast('Item is already in inventory', success: false),
+          backgroundColor: Colors.transparent,
+        ),
+      );
+      return;
+    }
+
     await showWriteButtonSheet(
       context: context,
       item: writeData,
