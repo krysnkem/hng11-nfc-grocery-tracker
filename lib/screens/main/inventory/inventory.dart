@@ -22,6 +22,7 @@ import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
 import 'package:grocey_tag/widgets/text-field-widget.dart';
 import 'package:intl/intl.dart';
 
+import '../../../utils/app-bottom-sheet.dart';
 import '../../../widgets/filter.dart';
 
 List<String> filterItems = ["Date Bought", "Quantity", "Expiry Date"];
@@ -41,7 +42,7 @@ final filteredItemListProvider = Provider<List<Item>>((ref) {
       .where((item) => item.name.toLowerCase().contains(searchQuery))
       .toList();
   filtered.sort(
-        (a, b) {
+    (a, b) {
       switch (sortCriteria) {
         case "Date Bought":
           return b.purchaseDate.compareTo(a.purchaseDate);
@@ -78,7 +79,30 @@ class _InventoryState extends ConsumerState<Inventory> {
     ref.read(sortCriteriaProvider.notifier).state = val;
   }
 
-  bool isempty = false;
+  showOption() async {
+    appBottomSheet(Column(
+      children: [
+        AppButton(
+          text: "Write",
+          isOutline: true,
+          borderColor: primaryColor,
+          textColor: primaryColor,
+          onTap: () async {
+            Navigator.of(context).pop();
+            navigationService.navigateToWidget(const AddItemScreen());
+          },
+        ),
+        10.sp.sbH,
+        AppButton(
+          text: "Cancel",
+          onTap: navigationService.goBack,
+          backGroundColor: Colors.red,
+          borderColor: Colors.red,
+        ),
+        16.sp.sbH
+      ],
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,160 +123,154 @@ class _InventoryState extends ConsumerState<Inventory> {
             16.w.sbW
           ],
         ),
-        body: isempty
-            ? Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Center(
-              child: SvgPicture.asset(AppImages.noResults,
-                  height: 150.sp, width: 184.61.sp),
-            ),
-            AppText(
-              "Inventory",
-              weight: FontWeight.bold,
-              size: 22.sp,
-            ),
-            AppText(
-              "Your items would be managed here ",
-              weight: FontWeight.w300,
-              size: 14.sp,
-            ),
-            10.h.sbH,
-            AppButton(
-              width: 358.sp,
-              height: 46.sp,
-              onTap: () {},
-              text: "Register Your first Item",
-            ),
-            30.h.sbH,
-            Text.rich(TextSpan(children: [
-              TextSpan(
-                text: "Confused? Learn how it works ",
-                style: TextStyle(color: blackColor),
-              ),
-              const TextSpan(
-                  text: "here", style: TextStyle(color: Colors.grey))
-            ]))
-          ],
-        )
-            : GestureDetector(
-          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-          child: Column(
-            children: [
-              Padding(
-                padding: 16.sp.padH,
-                child: Row(
+        body: itemList.isEmpty
+            ? Padding(
+                padding: 16.sp.padA,
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: AppTextField(
-                        contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16.sp, vertical: 7.sp),
-                        prefix: Icon(
-                          CupertinoIcons.search,
-                          size: 26.sp,
-                        ),
-                        hint: "Search",
-                        onChanged: (value) {
-                          ref.read(searchQueryProvider.notifier).state =
-                              value;
-                        },
+                    Center(
+                      child: SvgPicture.asset(AppImages.noResults,
+                          height: 150.sp, width: 184.61.sp),
+                    ),
+                    AppText(
+                      "Inventory",
+                      weight: FontWeight.bold,
+                      size: 22.sp,
+                    ),
+                    AppText(
+                      "Your items would be managed here ",
+                      weight: FontWeight.w300,
+                      size: 14.sp,
+                    ),
+                    10.h.sbH,
+                    AppButton(
+                      height: 46.sp,
+                      onTap: showOption,
+                      text: "Register Your first Item",
+                    ),
+                    30.h.sbH,
+                  ],
+                ),
+              )
+            : GestureDetector(
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: 16.sp.padH,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: AppTextField(
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16.sp, vertical: 7.sp),
+                              prefix: Icon(
+                                CupertinoIcons.search,
+                                size: 26.sp,
+                              ),
+                              hint: "Search",
+                              onChanged: (value) {
+                                ref.read(searchQueryProvider.notifier).state =
+                                    value;
+                              },
+                            ),
+                          ),
+                          20.w.sbW,
+                          Container(
+                            height: 48.sp,
+                            alignment: Alignment.center,
+                            child: PopupMenuButton<String>(
+                              onSelected: onSelect,
+                              itemBuilder: (BuildContext context) {
+                                return filterItems.map((String choice) {
+                                  return PopupMenuItem<String>(
+                                    value: choice,
+                                    child: AppText(
+                                      choice,
+                                      weight: FontWeight.w400,
+                                      size: 12.sp,
+                                    ),
+                                  );
+                                }).toList();
+                              },
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Filterbutton(),
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
                       ),
                     ),
-                    20.w.sbW,
-                    Container(
-                      height: 48.sp,
-                      alignment: Alignment.center,
-                      child: PopupMenuButton<String>(
-                        onSelected: onSelect,
-                        itemBuilder: (BuildContext context) {
-                          return filterItems.map((String choice) {
-                            return PopupMenuItem<String>(
-                              value: choice,
-                              child: AppText(
-                                choice,
-                                weight: FontWeight.w400,
-                                size: 12.sp,
+                    15.h.sbH,
+                    Expanded(
+                      child: Builder(builder: (context) {
+                        return ListView.builder(
+                          itemCount: itemList.length,
+                          itemBuilder: (context, index) {
+                            final item = itemList[index];
+                            return GestureDetector(
+                              onTap: () {
+                                // Navigator.push(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //         builder: (context) => EditItemScreen()));
+                              },
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    title: Row(
+                                      children: [
+                                        AppText(
+                                          item.name,
+                                          size: 16.sp,
+                                          weight: FontWeight.w500,
+                                        ),
+                                        const Spacer(),
+                                        trailer(
+                                            date: DateFormat('d MMM yyyy')
+                                                .format(item.purchaseDate),
+                                            text: 'Purchase:')
+                                      ],
+                                    ),
+                                    subtitle: Row(children: [
+                                      AppText(
+                                        ""
+                                        "${item.quantity} ${item.metric.name.toUpperCase()} left",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(fontSize: 11.sp),
+                                      ),
+                                      const Spacer(),
+                                      trailer(
+                                        date: DateFormat('d MMM yyyy')
+                                            .format(item.expiryDate),
+                                        text: "Expiry:",
+                                      ),
+                                    ]),
+                                  ),
+                                  10.h.sbH
+                                ],
                               ),
                             );
-                          }).toList();
-                        },
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Filterbutton(),
-                          ],
-                        ),
-                      ),
+                          },
+                        );
+                      }),
                     )
                   ],
                 ),
-              ),
-              15.h.sbH,
-              Expanded(
-                child: Builder(builder: (context) {
-                  return ListView.builder(
-                    itemCount: itemList.length,
-                    itemBuilder: (context, index) {
-                      final item = itemList[index];
-                      return GestureDetector(
-                        onTap: () {
-                          // Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(
-                          //         builder: (context) => EditItemScreen()));
-                        },
-                        child: Column(
-                          children: [
-                            ListTile(
-                              title: Row(
-                                children: [
-                                  AppText(
-                                    item.name,
-                                    size: 16.sp,
-                                    weight: FontWeight.w500,
-                                  ),
-                                  const Spacer(),
-                                  trailer(
-                                      date: DateFormat('d MMM yyyy')
-                                          .format(item.purchaseDate),
-                                      text: 'Purchase:')
-                                ],
-                              ),
-                              subtitle: Row(children: [
-                                AppText(
-                                  ""
-                                      "${item.quantity} ${item.metric.name.toUpperCase()} left",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(fontSize: 11.sp),
-                                ),
-                                const Spacer(),
-                                trailer(
-                                  date: DateFormat('d MMM yyyy')
-                                      .format(item.expiryDate),
-                                  text: "Expiry:",
-                                ),
-                              ]),
-                            ),
-                            10.h.sbH
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                }),
-              )
-            ],
-          ),
-        ));
+              ));
   }
 
   void onAddItem() {
-        () {
+    () {
       showReadButtonSheet(context: context).then(
-            (result) async {
+        (result) async {
           log('Result: ${result.status}');
           if (result.status == NfcReadStatus.success) {
             final item = result.data as Item;
@@ -309,9 +327,9 @@ class trailer extends StatelessWidget {
           TextSpan(
             text: date,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w400,
-            ),
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w400,
+                ),
           ),
         ],
       ),
