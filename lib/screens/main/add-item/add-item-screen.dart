@@ -8,11 +8,13 @@ import 'package:grocey_tag/core/constants/pallete.dart';
 import 'package:grocey_tag/core/enums/enum.dart';
 import 'package:grocey_tag/core/models/item.dart';
 import 'package:grocey_tag/providers/inventory_provider/inventory_provider.dart';
+import 'package:grocey_tag/screens/main/home/widgets/confirm_should_over_write.dart';
 import 'package:grocey_tag/utils/date-util.dart';
 import 'package:grocey_tag/utils/snack_message.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
 import 'package:grocey_tag/widgets/drop_down_menu.dart';
+import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
 import 'package:grocey_tag/widgets/scan_tag/show_write_button_sheet.dart';
 import 'package:grocey_tag/widgets/text-field-widget.dart';
 
@@ -101,6 +103,33 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
       threshold: int.parse(warningQuantityController.text.trim()),
     );
 
+    await showReadButtonSheet(context: context).then(
+      (result) async {
+        log('Result: ${result.status}');
+        if (result.status == NfcReadStatus.success) {
+          final item = result.data as Item;
+          final shouldOverwrite = await confirmShouldOverWrite(context,
+              title: 'This tag is for ${item.name}');
+
+          if (shouldOverwrite) {
+            await writeToTag(writeData);
+          }
+          return;
+        }
+
+        if (result.status == NfcReadStatus.empty) {
+          await writeToTag(writeData);
+          return;
+        }
+
+        if (result.error != null) {
+          toast(result.error!);
+        }
+      },
+    );
+  }
+
+  Future<void> writeToTag(Item writeData) async {
     await showWriteButtonSheet(
       context: context,
       item: writeData,
