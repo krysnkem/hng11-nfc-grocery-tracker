@@ -189,10 +189,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Row(
                   children: [
                     DashBoardCard(
-                      count: notifier.totalExpiringItemsCount,
-                      svgImage: AppImages.warning,
-                      title: "Expiring soon",
-                    ),
+                        count: notifier.totalExpiringItemsCount,
+                        svgImage: AppImages.warning,
+                        title: "Expiring soon",
+                        onTap: () => widget.onNavigationItem(2)),
                     16.sp.sbW,
                     DashNavigateCard(
                       onTap: () => widget.onNavigationItem(1),
