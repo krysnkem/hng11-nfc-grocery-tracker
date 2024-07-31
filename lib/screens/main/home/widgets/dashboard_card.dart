@@ -10,14 +10,16 @@ class DashBoardCard extends StatelessWidget {
   final int count;
   final String title;
   final String svgImage;
+  final VoidCallback? onTap;
   const DashBoardCard({
-    super.key, required this.count, required this.title, required this.svgImage,
+    super.key, required this.count, required this.title, required this.svgImage, this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: AppCard(
+        onTap: onTap,
         heights: 92.sp,
         padding: EdgeInsets.symmetric(horizontal: 12.sp, vertical: 16.sp),
         child: Column(

@@ -12,10 +12,14 @@ import 'package:grocey_tag/screens/main/home/widgets/confirm_should_over_write.d
 import 'package:grocey_tag/screens/main/shoppinglist.dart/restockitem.dart';
 import 'package:grocey_tag/utils/snack_message.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
+import 'package:grocey_tag/widgets/app-card.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
 import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
 
+import '../../../core/constants/app_images.dart';
+import '../../../core/constants/pallete.dart';
 import '../../../widgets/app_button.dart';
+import '../../../widgets/empty-state.dart';
 
 class ShoppingList extends ConsumerStatefulWidget {
   const ShoppingList({super.key});
@@ -38,22 +42,44 @@ class _ShoppingListState extends ConsumerState<ShoppingList> {
         ),
         body: Column(
           children: [
-            const AppText(
-              "This is an automated list of items running low on stocks",
+            Padding(
+              padding: 16.sp.padH,
+              child: const Row(
+                children: [
+                  Expanded(
+                    child: AppText(
+                        "This is an automated list of items running low on stocks"),
+                  ),
+                ],
+              ),
             ),
             20.h.sbH,
             Expanded(
-              child: ListView.builder(
+              child: shoppingList.isEmpty?
+              const EmptyListState(
+                  text: "No Item in Shopping List",
+                  lottieFile: AppImages.emptyInventory
+              ):
+              ListView.builder(
                   itemCount: shoppingList.length,
                   itemBuilder: (context, index) {
                     var item = shoppingList[index];
                     return ListTile(
                       title: Row(
                         children: [
-                          AppText(item.name),
-                          40.w.sbW,
-                          AppText("(${item.quantity})"),
-                          40.w.sbW,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              AppText(
+                                item.name,
+                                size: 16.sp,
+                                weight: FontWeight.w600,
+                              ),
+                              40.w.sbW,
+                              AppText("Quantity left: (${item.quantity})"),
+                            ],
+                          ),
+                          40.sp.sbW,
                           if (item.isExpired) ...[
                             Container(
                               padding: const EdgeInsets.all(4),
@@ -67,74 +93,66 @@ class _ShoppingListState extends ConsumerState<ShoppingList> {
                                     color: Colors.orange, fontSize: 11),
                               ),
                             ),
-                          ],
+                          ]
                         ],
                       ),
-                      trailing: SizedBox(
-                          width: 68.sp,
-                          height: 28.sp,
-                          child: AppButton(
-                            onTap: () {
-                              ///TODO:REMOVE
-                              // navigationService.navigateToWidget(
-                              //   Restockitem(
-                              //     item: item,
-                              //   ),
-                              // );
-                              // return;
-
-                              ///TODO:REMOVE
-                              showReadButtonSheet(context: context).then(
-                                (result) async {
-                                  log('Result: ${result.status}');
-                                  if (result.status == NfcReadStatus.success) {
-                                    final item = result.data as Item;
-                                    if (item.name != shoppingList[index].name) {
-                                      showError(
-                                        context,
-                                        'This tag belongs to another Item',
-                                      );
-                                    } else {
-                                      navigationService.navigateToWidget(
-                                        Restockitem(
-                                          item: item,
-                                        ),
-                                      );
-                                    }
-                                    return;
+                      trailing: AppCard(
+                          backgroundColor: whiteColor,
+                          bordered: true,
+                          radius: 30.sp,
+                          borderWidth: 0.6.sp,
+                          expandable: true,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 16.sp, vertical: 10.sp),
+                          onTap: () {
+                            showReadButtonSheet(context: context).then(
+                                  (result) async {
+                                log('Result: ${result.status}');
+                                if (result.status == NfcReadStatus.success) {
+                                  final item = result.data as Item;
+                                  if (item.name != shoppingList[index].name) {
+                                    showError(
+                                      context,
+                                      'This tag belongs to another Item',
+                                    );
+                                  } else {
+                                    navigationService.navigateToWidget(
+                                      Restockitem(
+                                        item: item,
+                                      ),
+                                    );
                                   }
+                                  return;
+                                }
 
-                                  if (result.status == NfcReadStatus.empty) {
-                                    showError(context, 'This tag is empty');
-                                    return;
+                                if (result.status == NfcReadStatus.empty) {
+                                  showError(context, 'This tag is empty');
+                                  return;
+                                }
+
+                                if (result.status ==
+                                    NfcReadStatus.notForApp) {
+                                  var message = 'Data is not for this app';
+                                  showError(context, message);
+                                  final shouldOverwrite =
+                                  await confirmShouldOverWrite(context);
+
+                                  if (shouldOverwrite) {
+                                    navigationService.navigateToWidget(
+                                        const AddItemScreen());
                                   }
+                                  return;
+                                }
 
-                                  if (result.status ==
-                                      NfcReadStatus.notForApp) {
-                                    var message = 'Data is not for this app';
-                                    showError(context, message);
-                                    final shouldOverwrite =
-                                        await confirmShouldOverWrite(context);
-
-                                    if (shouldOverwrite) {
-                                      navigationService.navigateToWidget(
-                                          const AddItemScreen());
-                                    }
-                                    return;
-                                  }
-
-                                  if (result.error != null) {
-                                    toast(result.error!);
-                                  }
-                                },
-                              );
-                            },
-                            isOutline: true,
-                            textColor: Colors.grey.shade400,
-                            text: "Restock",
-                            borderColor: Colors.grey.shade400,
-                            borderRadius: 16.sp,
-                          )),
+                                if (result.error != null) {
+                                  toast(result.error!);
+                                }
+                              },
+                            );
+                          },
+                          child: AppText(
+                            "Restock",
+                          ))
                     );
                   }),
             )

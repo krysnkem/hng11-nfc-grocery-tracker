@@ -22,6 +22,7 @@ import 'package:grocey_tag/widgets/apptext.dart';
 import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
 
 import '../../../utils/app-bottom-sheet.dart';
+import '../../../widgets/empty-state.dart';
 import 'widgets/confirm_should_over_write.dart';
 import 'widgets/dashboard_card.dart';
 
@@ -289,12 +290,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       count: state.items.length,
                       svgImage: AppImages.inventory,
                       title: "Total items",
+                      onTap: ()=> widget.onNavigationItem(1),
                     ),
                     16.sp.sbW,
                     DashBoardCard(
                       count: notifier.totalRunningLowItemsCount,
                       svgImage: AppImages.trend,
                       title: "Running low",
+                      onTap: ()=> widget.onNavigationItem(2)
                     ),
                   ],
                 ),
@@ -364,7 +367,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 16.sp.sbH,
                 Builder(builder: (context) {
                   final activities = ref.watch(activityProvider).activities;
-                  return ListView.builder(
+                  return activities.isEmpty? const EmptyListState(
+                      text: "No recent activity",
+                      lottieFile: AppImages.emptyInventory
+                  ):
+                    ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: activities.length,
