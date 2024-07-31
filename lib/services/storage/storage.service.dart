@@ -1,7 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:grocey_tag/services/storage/app_db.dart';
 import 'package:grocey_tag/core/models/activity.dart';
 import 'package:grocey_tag/core/models/item.dart';
+import 'package:grocey_tag/services/storage/app_db.dart';
 
 class FlutterSecureStorageService {
   FlutterSecureStorage storage = const FlutterSecureStorage();

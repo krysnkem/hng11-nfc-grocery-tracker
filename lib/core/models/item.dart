@@ -51,7 +51,7 @@ class Item extends Equatable {
   bool get isExpired => expiryDate.isBefore(DateTime.now());
 
   bool get expiringSoon =>
-      expiryDate.isBefore(DateTime.now().add(const Duration(days: 7)));
+      expiryDate.isBefore(DateTime.now().add(const Duration(days: 2)));
 
   @override
   String toString() {
