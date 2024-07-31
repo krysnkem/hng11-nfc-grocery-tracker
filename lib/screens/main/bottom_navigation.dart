@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:grocey_tag/core/constants/app_images.dart';
 import 'package:grocey_tag/screens/main/inventory/inventory.dart';
 import 'package:grocey_tag/screens/main/shoppinglist.dart/shoppinglist.dart';
+import 'package:grocey_tag/utils/widget_extensions.dart';
+import 'package:grocey_tag/widgets/apptext.dart';
+import 'package:grocey_tag/widgets/empty-state.dart';
+import 'package:lottie/lottie.dart';
 
+import '../../services/nfc_service.dart';
 import '../../utils/pop_up.dart';
 import '../../widgets/botton_nav_component.dart';
 import 'home/home-screen.dart';
@@ -22,8 +30,6 @@ class _BottomNavigationState extends ConsumerState<BottomNavigation> {
   void initState() {
     super.initState();
 
-    ///@Udoh please refactor this part, there should be a non dismissible dialog that is shown
-    /// if nfc is not enabled on the device
     // checkNfcAvailable = ref.read(nfcServiceProvider).isNfcAvailable();
     checkNfcAvailable = () async {
       return true;
@@ -70,13 +76,9 @@ class _BottomNavigationState extends ConsumerState<BottomNavigation> {
         future: checkNfcAvailable,
         builder: (context, snapshot) {
           if (snapshot.data == false) {
-            ///@Udoh please refactor this part, there should be a non dismissible dialog that is shown
-            /// if nfc is not enabled on the device
-            return const Scaffold(
-              body: Center(
-                child: Text("NFC not available"),
-              ),
-            );
+            return const EmptyListState(
+                text: "Your Defice is not NFC enabled",
+                lottieFile: AppImages.noNFC);
           }
           return Scaffold(
             body: selectedPage == 0
