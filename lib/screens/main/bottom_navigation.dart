@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grocey_tag/core/constants/app_images.dart';
 import 'package:grocey_tag/screens/main/inventory/inventory.dart';
 import 'package:grocey_tag/screens/main/shoppinglist.dart/shoppinglist.dart';
+import 'package:grocey_tag/services/nfc_service.dart';
 import 'package:grocey_tag/widgets/empty-state.dart';
 
 import '../../utils/pop_up.dart';
@@ -24,10 +25,10 @@ class _BottomNavigationState extends ConsumerState<BottomNavigation> {
   void initState() {
     super.initState();
 
-    // checkNfcAvailable = ref.read(nfcServiceProvider).isNfcAvailable();
-    checkNfcAvailable = () async {
-      return true;
-    }();
+    checkNfcAvailable = ref.read(nfcServiceProvider).isNfcAvailable();
+    // checkNfcAvailable = () async {
+    //   return true;
+    // }();
   }
 
   int selectedPage = 0;
