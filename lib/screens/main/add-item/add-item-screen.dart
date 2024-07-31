@@ -112,6 +112,24 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
               title: 'This tag is for ${item.name}');
 
           if (shouldOverwrite) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Removing Item from inventory'),
+                  backgroundColor: Colors.transparent,
+                ),
+              );
+            }
+
+            await ref.read(inventoryProvider.notifier).removeItem(item);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Overwrite tag'),
+                  backgroundColor: Colors.transparent,
+                ),
+              );
+            }
             await writeToTag(writeData);
           }
           return;

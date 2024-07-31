@@ -7,7 +7,9 @@ Future<bool> confirmShouldOverWrite(BuildContext context, {String? title}) {
     context: context,
     builder: (context) => AlertDialog(
       title: Text(title ?? 'Your tag is not emtpy'),
+      backgroundColor: Colors.white,
       content: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           const Text('Do you want to overwrite it?'),
           16.sp.sbH,
