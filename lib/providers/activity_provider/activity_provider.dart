@@ -51,6 +51,15 @@ class ActivityStateNotifier extends StateNotifier<ActivityState> {
       metric: oldItem.metric,
     ));
   }
+
+  void registerDelete(Item item) {
+    registerActivity(Activity.generate(
+      itemName: item.name,
+      quantity: item.quantity,
+      operation: Operation.delete,
+      metric: item.metric,
+    ));
+  }
 }
 
 final activityProvider =

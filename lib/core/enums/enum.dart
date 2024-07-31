@@ -1,4 +1,4 @@
-enum Operation { subtract, add }
+enum Operation { subtract, add, delete }
 
 // for this unit, you can add more if there is a need
 enum Metric {
