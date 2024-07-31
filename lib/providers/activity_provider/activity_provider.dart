@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grocey_tag/core/enums/enum.dart';
 import 'package:grocey_tag/core/models/activity.dart';
 import 'package:grocey_tag/core/models/item.dart';
-import 'package:grocey_tag/services/storage.service.dart';
+import 'package:grocey_tag/services/storage/storage.service.dart';
 
 import 'activity_state.dart';
 

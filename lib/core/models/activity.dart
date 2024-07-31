@@ -1,26 +1,28 @@
 import 'package:grocey_tag/core/enums/enum.dart';
-
 class Activity {
-  const Activity(
-      {required this.itemName,
-      required this.quantity,
-      required this.operation,
-      required this.date,
-      required this.metric});
+  const Activity({
+    required this.itemName,
+    required this.quantity,
+    required this.operation,
+    required this.date,
+    required this.metric,
+  });
+
   final String itemName;
+  final Metric metric;
   // how much of this item was removed or added
   final int quantity;
-  // wether the item was removed or added
+  // whether the item was removed or added
   final Operation operation;
   final DateTime date;
-  final Metric metric;
 
-  Activity copyWith(
-      {String? itemName,
-      int? quantity,
-      DateTime? date,
-      Operation? operation,
-      Metric? metric}) {
+  Activity copyWith({
+    String? itemName,
+    int? quantity,
+    DateTime? date,
+    Operation? operation,
+    Metric? metric,
+  }) {
     return Activity(
       itemName: itemName ?? this.itemName,
       quantity: quantity ?? this.quantity,
@@ -30,11 +32,12 @@ class Activity {
     );
   }
 
-  static Activity generate(
-      {required String itemName,
-      required int quantity,
-      required Operation operation,
-      required Metric metric}) {
+  static Activity generate({
+    required String itemName,
+    required int quantity,
+    required Operation operation,
+    required Metric metric,
+  }) {
     return Activity(
       itemName: itemName,
       quantity: quantity,
@@ -46,16 +49,16 @@ class Activity {
 
   @override
   String toString() {
-    return 'Quantity(item: ${itemName.toString()}, qty: quantity, operation: ${operation.name}, date: $date)';
+    return 'Quantity(item: ${itemName.toString()}, qty: $quantity, operation: ${operation.name}, date: $date)';
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'itemName': itemName,
-      'quantity': quantity,
-      'operation': operation.name,
       'date': date.toString(),
+      'itemName': itemName,
       'metric': metric.name,
+      'operation': operation.name,
+      'quantity': quantity,
     };
   }
 
