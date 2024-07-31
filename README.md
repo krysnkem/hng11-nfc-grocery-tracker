@@ -84,13 +84,15 @@ These instructions will get you a copy of the project up and running on your loc
 ## Download NFC grocery App 
 Download App from [here](https://drive.google.com/drive/folders/1KdFtX6edR-zOFsbcWFkky4Oit62ix_h_?usp=drive_link)
 
+## Figma Link, courtesy of Team Kimiko's amazing designers
+Get the Figma design [here](https://www.figma.com/design/cOk0NbRxqH1taLKaNyPY31/TEAM-KIMIKO-(TELEX)---NFC-PROJECTS-(Copy)?node-id=0-1&t=sdavRg3xNmHxJzIu-0)
 
+## Team: Team Kimiko (Telex)
+- [@krysnkem](https://github.com/krysnkem) (GitHub: krysnkem | Slack: @Christian Onyisi)
+- [@andymaking](https://github.com/andymaking) (GitHub: andymaking | Slack: @the_andima)
+- [@adebola-duf](https://github.com/adebola-duf) (GitHub: adebola-duf | Slack: @bolexyro)
+- [@ManifestJosh](https://github.com/ManifestJosh) (GitHub: ManifestJosh | Slack: @Manifest)
 
-## Team : Team Kimoko
-- [@krysnkem](https://github.com/krysnkem)
-- [@andymaking](https://github.com/andymaking)
-- [@adebola-duf](https://github.com/adebola-duf)
-- [@ManifestJosh](https://github.com/ManifestJosh)
 
 
   Feel free to reach out to the team for any questions.
