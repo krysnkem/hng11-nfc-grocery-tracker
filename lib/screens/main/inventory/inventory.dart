@@ -146,7 +146,7 @@ class _InventoryState extends ConsumerState<Inventory> {
                     10.h.sbH,
                     AppButton(
                       height: 46.sp,
-                      onTap: showOption,
+                      onTap: onAddItem,
                       text: "Register Your first Item",
                     ),
                     30.h.sbH,

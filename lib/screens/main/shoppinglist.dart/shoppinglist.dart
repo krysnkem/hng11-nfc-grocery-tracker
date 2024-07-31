@@ -9,8 +9,6 @@ import 'package:grocey_tag/core/constants/constants.dart';
 import 'package:grocey_tag/core/enums/enum.dart';
 import 'package:grocey_tag/core/models/item.dart';
 import 'package:grocey_tag/providers/inventory_provider/inventory_provider.dart';
-import 'package:grocey_tag/screens/main/add-item/add-item-screen.dart';
-import 'package:grocey_tag/screens/main/home/widgets/confirm_should_over_write.dart';
 import 'package:grocey_tag/screens/main/home/widgets/show_status_snack_bar.dart';
 import 'package:grocey_tag/screens/main/shoppinglist.dart/restockitem.dart';
 import 'package:grocey_tag/utils/widget_extensions.dart';
@@ -130,15 +128,10 @@ class _ShoppingListState extends ConsumerState<ShoppingList> {
                                         var message =
                                             'Data is not for this app';
                                         showErrorSnackBar(
-                                            context: context, message: message);
-                                        final shouldOverwrite =
-                                            await confirmShouldOverWrite(
-                                                context);
+                                          context: context,
+                                          message: message,
+                                        );
 
-                                        if (shouldOverwrite) {
-                                          navigationService.navigateToWidget(
-                                              const AddItemScreen());
-                                        }
                                         return;
                                       }
 
