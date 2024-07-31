@@ -116,6 +116,24 @@ class InventoryStateNotifier extends StateNotifier<InventoryState> {
       state = state.setError(message: e.toString());
     }
   }
+
+  Future<void> removeItem(Item item) async {
+    try {
+      final index = state.items.indexWhere(
+        (element) => element.name == item.name,
+      );
+
+      final items = List<Item>.from(state.items);
+      items.removeAt(index);
+      items.sort((a, b) => b.purchaseDate.compareTo(a.purchaseDate));
+
+      state = InventoryState.loaded(items);
+      _ref.read(activityProvider.notifier).registerDelete(item);
+      await StorageService.delete(item);
+    } catch (e) {
+      state = state.setError(message: e.toString());
+    }
+  }
 }
 
 final inventoryProvider =

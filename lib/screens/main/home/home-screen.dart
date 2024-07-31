@@ -6,7 +6,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grocey_tag/core/constants/app_images.dart';
 import 'package:grocey_tag/core/constants/constants.dart';
-import 'package:grocey_tag/core/constants/pallete.dart';
 import 'package:grocey_tag/core/enums/enum.dart';
 import 'package:grocey_tag/core/models/item.dart';
 import 'package:grocey_tag/providers/activity_provider/activity_provider.dart';
@@ -20,7 +19,6 @@ import 'package:grocey_tag/widgets/app_button.dart';
 import 'package:grocey_tag/widgets/apptext.dart';
 import 'package:grocey_tag/widgets/scan_tag/show_read_button_sheet.dart';
 
-import '../../../utils/app-bottom-sheet.dart';
 import '../../../widgets/empty-state.dart';
 import 'widgets/confirm_should_over_write.dart';
 import 'widgets/dashboard_card.dart';
@@ -118,71 +116,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   showOption() async {
-    () {
-      appBottomSheet(Column(
-        children: [
-          AppButton(
-            text: "Read",
-            isOutline: true,
-            borderColor: primaryColor,
-            textColor: primaryColor,
-            onTap: () async {
-              Navigator.of(context).pop();
-              showReadButtonSheet(context: context).then(
-                (result) {
-                  log('Result: ${result.status}');
-                  if (result.status == NfcReadStatus.success) {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text('What we found'),
-                          content: Text('${(result.data as Item).toJson()}'),
-                        );
-                      },
-                    );
-                  }
-
-                  if (result.error != null) {
-                    toast(result.error!);
-                  }
-
-                  if (result.status == NfcReadStatus.notForApp) {
-                    toast('read data is not for app');
-                  }
-                },
-              );
-            },
-          ),
-          10.sp.sbH,
-          AppButton(
-            text: "Write",
-            isOutline: true,
-            borderColor: primaryColor,
-            textColor: primaryColor,
-            onTap: () async {
-              Navigator.of(context).pop();
-              _showWriteDialog().then(
-                (writeData) async {
-                  if (writeData != null) {
-                    log('${writeData.toJson()}');
-                  }
-                },
-              );
-            },
-          ),
-          10.sp.sbH,
-          AppButton(
-            text: "Cancel",
-            onTap: navigationService.goBack,
-            backGroundColor: Colors.red,
-            borderColor: Colors.red,
-          ),
-          16.sp.sbH
-        ],
-      ));
-    };
-
     showReadButtonSheet(context: context).then(
       (result) async {
         log('Result: ${result.status}');

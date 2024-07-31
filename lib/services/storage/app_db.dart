@@ -39,6 +39,6 @@ class AppDb {
     await db.execute(
         'CREATE TABLE items (name TEXT PRIMARY KEY, quantity INTEGER, metric TEXT, purchaseDate TEXT, expiryDate TEXT, additionalNote TEXT, threshold INTEGER)');
     await db.execute(
-        'CREATE TABLE activities ( date TEXT PRIMARY KEY, itemName TEXT, itemMetric TEXT, operation TEXT, quantity INTEGER)');
+        'CREATE TABLE activities ( date TEXT PRIMARY KEY, itemName TEXT, metric TEXT, operation TEXT, quantity INTEGER)');
   }
 }
